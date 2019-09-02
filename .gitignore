@@ -1,6 +1,10 @@
-.DS_Store
-Thumbs.db
+_site
+_posts/_draft
+_archive
+node_modules
+.vscode
 *.log
-public/
-.deploy*/
-.vscode/
+*.sh
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
