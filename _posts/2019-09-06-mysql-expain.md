@@ -1,1 +1,17 @@
-# 
+---
+layout: post
+title: "Mysql 系列 EXPALIN"
+subtitle: '《Mysql 技术内幕：InnoDB存储引擎》'
+author: "lichao"
+header-img: "img/post-bg-2015.jpg"
+catalog: true
+tags:
+  - mysql
+---
+
+> 主要介绍《Mysql 技术内幕：InnoDB存储引擎》第一、二章相关知识点，
+
+
+
+
+
