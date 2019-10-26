@@ -1,12 +1,12 @@
 ---
 layout: post
 title: "MySQL 系列 EXPALIN"
-subtitle: '《Mysql 技术内幕：InnoDB存储引擎》'
+subtitle: '《MySQL 技术内幕：InnoDB存储引擎》'
 author: "lichao"
 header-img: "img/post-bg-2015.jpg"
 catalog: true
 tags:
-  - mysql
+  - MySQL
 ---
 
 > 执行EXPALIN获取mysql数据库的执行计划
