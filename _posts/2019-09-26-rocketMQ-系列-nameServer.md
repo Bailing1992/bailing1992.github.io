@@ -13,7 +13,7 @@ tags:
 
 NameServer主要作用是**为消息生产者和消息消费者提供关于主题Topic的路由信息**，那么NameServer需要存储路由的基础信息，还要能够管理Broker节点，包括路由注册、路由删除等功能。
 
-**NameServer本身的高可用可通过部署多台NameServer服务器来实现，但彼此之间互不通信，也就是NameServer服务器之间在某一时刻的数据并不会完全相同，但这对消息发送不会造成任何影响，这也是RocketMQ NameServer 设计的一个亮点， RocketMQNameServer 设计追求简单高效。**
+**NameServer的高可用可通过部署多台NameServer服务器来实现，但彼此之间互不通信，也就是NameServer服务器之间在某一时刻的数据并不会完全相同，但这对消息发送不会造成任何影响，这也是RocketMQ NameServer 设计的一个亮点， RocketMQNameServer 设计追求简单高效。**
 
 ## 概念
 ##### 服务发现
@@ -32,6 +32,7 @@ NameServer主要作用是**为消息生产者和消息消费者提供关于主�
 RocketMQ 路由注册是通过 Broker与 Name Server的心跳功能实现的。Broker启动时向集群中所有的 NameServer发送心跳语句，每隔30s向集群中所有NameServer发送心跳包，NameServer收到Broker心跳包时会更新 brokerLiveTable缓存中 BrokerLivelnfo.lastUpdateTimestamp，然后 NameServer每隔10s扫描brokerLiveTable ，如果连续120s 没有收到心跳包，NameServer 将移除该Broker的路由信息同时关闭Socket连接。
 
 #### 路由注册
+![存储概览](/img/rocketmq/rocketmq_3.png)
 Broker 每隔 30s向 NameServer发送一个心跳包，心跳包中包含BrokerId 、Broker地址、Broker名称、Broker所属集群名称、Broker关联的FilterServer 列表。
 1. 路由注册需要加写锁，防止并发修改RoutelnfoManager 中的路由表。首先判断Broker 所属集群是否存在， 如果不存在，则创建，然后将broker加入到集群Broker集合中clusterAddrTable
 2. 维护BrokerData信息，首先从brokerAddrTable 根据BrokerName 尝试获取Broker信息，如果不存在， 则新建BrokerData 并放入到brokerAddrTable , registerFirst设置为true ；如果存在， 直接替换原先的， registerFirst 设置为false，表示非第一次注册。
