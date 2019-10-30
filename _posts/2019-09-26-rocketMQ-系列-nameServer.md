@@ -34,18 +34,18 @@ RocketMQ 路由注册是通过 Broker与 Name Server的心跳功能实现的。B
 #### 路由注册
 ![存储概览](/img/rocketmq/rocketmq_3.png)
 Broker 每隔 30s向 NameServer发送一个心跳包，心跳包中包含BrokerId 、Broker地址、Broker名称、Broker所属集群名称、Broker关联的FilterServer 列表。
-1. 路由注册需要加写锁，防止并发修改RoutelnfoManager 中的路由表。首先判断Broker 所属集群是否存在， 如果不存在，则创建，然后将broker加入到集群Broker集合中clusterAddrTable
-2. 维护BrokerData信息，首先从brokerAddrTable 根据BrokerName 尝试获取Broker信息，如果不存在， 则新建BrokerData 并放入到brokerAddrTable , registerFirst设置为true ；如果存在， 直接替换原先的， registerFirst 设置为false，表示非第一次注册。
-3. 如果 Broker为Master ，并且 Broker Topic配置信息发生变化或者是初次注册，则需要创建或更新Topic 路由元数据，填充topicQueueTable ， 其实就是为默认主题自动注册路由信息，其中包含MixAII.DEFAULTTOPIC 的路由信息。当消息生产者发送主题时，如果该主题未创建并且BrokerConfig 的autoCreateTopicEnable 为true 时， 将返回MixAII.DEFAULT TOPIC 的路由信息。
+1. 路由注册需要加写锁，防止并发修改 RoutelnfoManager中的路由表。首先判断Broker所属集群是否存在，如果不存在，则创建，然后将Broker加入到集群Broker集合中clusterAddrTable
+2. 维护BrokerData信息，首先从brokerAddrTable 根据BrokerName 尝试获取Broker信息，如果不存在， 则新建BrokerData 并放入到brokerAddrTable , registerFirst设置为true。如果存在，直接替换原先的，registerFirst 设置为false，表示非第一次注册。
+3. 如果 Broker为Master ，并且 BrokerTopic配置信息发生变化或者是初次注册，则需要创建或更新Topic 路由元数据，填充topicQueueTable ， 其实就是为默认主题自动注册路由信息，其中包含MixAII.DEFAULTTOPIC 的路由信息。当消息生产者发送主题时，如果该主题未创建并且BrokerConfig 的autoCreateTopicEnable为true 时， 将返回MixAII.DEFAULT TOPIC 的路由信息。
 4. 更新BrokerLivelnfo ，存活 Broker信息表， BrokeLivelnfo 是执行路由删除的重要依据
 5. 注册Broker的过滤器Server地址列表，一个Broker上会关联多个FilterServer消息过滤服务器。如果此Broker 为从节点，则需要查找该Broker 的Master 的节点信息，并更新对应的masterAddr 属性。
 
 > NameServe 与Broker 保持长连接， Broker 状态存储在brokerLiveTable 中，NameServer 每收到一个心跳包，将更新brokerLiveTable 中关于Broker 的状态信息以及路由表（ topicQueueTable 、brokerAddrTable 、brokerLiveTable 、filterServerTable ） 。更新上述路由表（ HashTable ）使用了锁粒度较少的读写锁，允许多个消息发送者（Producer ）并发读，保证消息发送时的高并发。但同一时刻 NameServer 只处理一个Broker心跳包，多个心跳包请求串行执行。这也是读写锁经典使用场景，更多关于读写锁的信息。
 #### 路由删除
-NameServer 会每隔 1Os扫描 brokerLiveTable状态表，如果BrokerLive 的lastUpdateTimestamp 的时间戳距当前时间超过120s ，则认为Broker失效，移除该Broker，关闭与Broker 连接，并同时更新topicQueueTable 、brokerAddrTable 、brokerLive Table 、filterServerTable 。RocktMQ 有两个触发点来触发路由删除：
+NameServer会每隔 1Os扫描 brokerLiveTable状态表，如果BrokerLive的lastUpdateTimestamp 的时间戳距当前时间超过120s ，则认为Broker失效，移除该Broker，关闭与Broker连接，并同时更新topicQueueTable 、brokerAddrTable 、brokerLive Table 、filterServerTable 。RocktMQ 有两个触发点来触发路由删除：
 1. NameServer 定时扫描brokerLiveTable 检测上次心跳包与当前系统时间的时间差，
 如果时间戳大于120s ，则需要移除该Broker 信息。
-2. Broker 在正常被关闭的情况下，会执行unr巳gisterBroker 指令。由于不管是何种方式触发的路由删除，路由删除的方法都是一样的，就是从topicQueueTable 、brokerAddrTable 、brokerLiveTable 、filterServerTable 删除与该Broker 相关的信息
+2. Broker 在正常被关闭的情况下，会执行 unregisterBroker 指令。由于不管是何种方式触发的路由删除，路由删除的方法都是一样的，就是从topicQueueTable 、brokerAddrTable 、brokerLiveTable 、filterServerTable 删除与该Broker 相关的信息
 
 #### 路由发现
 RocketMQ 路由发现是非实时的，当Topic路由出现变化后，NameServer不主动推送给客户端， 而是由客户端定时拉取主题最新的路由。
