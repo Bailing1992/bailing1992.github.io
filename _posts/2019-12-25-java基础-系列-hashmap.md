@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "java 基础 HashMap"
+title: "Java 基础 HashMap"
 subtitle: '深究Java基础'
 author: "lichao"
 header-img: "img/post-bg-rwd.jpg"
 catalog: true
 tags:
-  - java 
+  - Java 
 ---
 
 ## HashMap线程安全性问题
