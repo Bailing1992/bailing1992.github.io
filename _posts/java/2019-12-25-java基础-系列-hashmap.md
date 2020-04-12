@@ -10,6 +10,9 @@ tags:
 ---
 
 ## HashMap多线程并发存在什么问题？
+
+
+
 #### 多线程put可能导致元素的丢失
 #### put和get并发时，可能导致get为null
 #### JDK7中 HashMap 并发 put 会造成循环链表，导致 get 时出现死循环
