@@ -1,0 +1,28 @@
+---
+layout: post
+title: "IO 系列 MappedByteBuffer"
+subtitle: '解析 IO...'
+author: "lichao"
+header-img: "img/post-bg-2015.jpg"
+catalog: true
+tags:
+  - io
+---
+
+
+## MappedByteBuffer简要分析
+从 JDK 的源码来看，MappedByteBuffer 继承自 ByteBuffer，其内部维护了一个逻辑地址变量 address。在建立映射关系时，MappedByteBuffer 利用了 JDK NIO 的 FileChannel 类提供的 map() 方法把文件对象映射到虚拟内存。仔细看源码中 map() 方法的实现，可以发现最终其通过调用 native 方法 map0() 完成文件对象的映射工作，同时使用 Util.newMappedByteBuffer() 方法初始化MappedByteBuffer 实例，但最终返回的是 DirectByteBuffer 的实例。在 Java 程序中使用 MappedByteBuffer 的 get() 方法来获取内存数据是最终通过 DirectByteBuffer.get() 方法实现（底层通过 unsafe.getByte() 方法，以“地址 + 偏移量”的方式获取指定映射至内存中的数据）。
+
+#### 使用 Mmap 的限制
+1. Mmap映射的内存空间释放的问题；由于映射的内存空间本身就不属于JVM的堆内存区（Java Heap），因此其不受JVM GC的控制，卸载这部分内存空间需要通过系统调用 unmap()方法来实现。然而unmap()方法是FileChannelImpl类里实现的私有方法，无法直接显式调用。RocketMQ中的做法是，通过Java反射的方式调用“sun.misc”包下的Cleaner类的clean()方法来释放映射占用的内存空间；
+2. MMAP 使用时必须实现指定好内存映射的大小，并且一次 map 的大小限制在 1.5G 左右，重复 map 又会带来虚拟内存的回收、重新分配的问题，对于文件不确定大小的情形实在是太不友好了。
+3. MappedByteBuffer内存映射大小限制: 因为其占用的是虚拟内存（非JVM的堆内存），大小不受JVM的-Xmx参数限制，但其大小也受到OS虚拟内存大小的限制。一般来说，一次只能映射1.5~2G 的文件至用户态的虚拟内存空间，这也是为何RocketMQ默认设置单个CommitLog日志数据文件为1G的原因了；
+4. 使用 MappedByteBuffe的其他问题: 会存在内存占用率较高和文件关闭不确定性的问题；
+#### 内存映射技术
+Mmap内存映射和普通标准IO操作的本质区别在于它并不需要将文件中的数据先拷贝至OS的内核IO缓冲区，而是可以直接将用户进程私有地址空间中的一块区域与文件对象建立映射关系，这样程序就好像可以直接从内存中完成对文件读/写操作一样。只有当缺页中断发生时，直接将文件从磁盘拷贝至用户态的进程空间内，只进行了一次数据拷贝。对于容量较大的文件来说（文件大小一般需要限制在1.5~2G以下），采用Mmap的方式其读/写的效率和性能都非常高。
+![存储概览](/img/rocketmq/mmap2.png)
+
+## 使用场景
+
+
+
