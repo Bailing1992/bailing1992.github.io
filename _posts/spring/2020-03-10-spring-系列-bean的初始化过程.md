@@ -7,48 +7,32 @@ catalog: true
 tags:
   - spring
 ---
-![dubbo](/img/spring/2.webp)
 
 
->  Spring IOC 容器功能 非常强大，负责 Spring Bean 的创建和管理等功能。而 Spring Bean 是整个 Spring 应用中很重要的一部分，了解 Spring Bean 的生命周期对了解整个 Spring 框架会有很大的帮助。
+> spring ioc 容器功能非常强大，负责 spring bean 的创建和管理等功能。
 
-> Spring 只帮管理单例模式 Bean 的完整生命周期，对于 prototype 的 bean，Spring 在创建好交给使用者之后则不会再管理后续的生命周期。
+> Spring 管理单例模式 bean 的完整生命周期，对于 prototype 的 bean，Spring 在创建好交给使用者之后则不会再管理后续的生命周期。
 
 
-
-**过程:**
+## 过程
 1. 定义 和 注册 bean
 2. 获取 bean
 
 ## 定义和注册 bean
 定义 BeanDefinition 并注册到 BeanFactory 的这个过程, 就是 bean 的定义和注册 , 通常使用 spring 时并不是把一个 bean 的实例注册, 而是一个 BeanDefinition.
 
-**常用的定义 bean 的方式：**
+> 常用的定义 bean 的方式：
 1. 在 xml 中 定义 bean 标签
 2. 注解扫描, 比如 @Service
 3. 定义 Configuration 类, 在类中提供 @Bean 的方法来定义
 4. 使用纯粹的 programmatically 的方式来定义和注册
 
-
-#### BeanFactory
-BeanFactory 是专门用来获取 bean 的接口. 它有诸多实现, 其中 ConfigurableListableBeanFactory 是最常用的。功能包括：
-1. BeanFactory 提供了根据 name、type 等获取一个 bean 对象的能力
-2. ListableBeanFactory 继承 BeanFactory，提供了列出所有 bean 对象的能力
-3. HierarchialBeanFacotry 继承 BeanFactory， 使得 factory 拥有一个 parent factory, 可以存在层级关系
-4. SingletonbeanRegistry 提供了单例对象缓存的能力
-5. AutowireCapableBeanFacory 继承 BeanFactory， 提供了在创建对象时, 通过 set 方式给 bean 初始化 autowired 或者声明了 dependon 的成员
-6. ConfigurableBeanFactory 继承 ListableBeanFactory 和 HierarchialBeanFacotry，给 factory 提供了很多配置的方法, 比如设置 BeanPostProcessor
-7. AliasRegistry 支持别名
-
-###### DefaultListableBeanFactory
-DefaultListableBeanFactory 通过 BeanDefinition 定义类, 在第一次 get 时实例化, 并在实例化过程中同时实例化依赖类, 并做属性填充, 并执行一些初始化前后的 processor.
-
-> 常从 xml 中、代码注解中定义 bean, 通过 XmlBeanDefinitionReader 和 ClassPathBeanDefinitionScanner 生成 bean definition 注册到 DefaultListableBeanFactory 中。
-
-#### BeanDefinition
+## BeanDefinition
 完全的定义了一个 bean 的实例化、初始化方式。
 
-###### Bean 实例化过程(单例模式)
+## Bean 实例化过程(单例模式)
+![dubbo](/img/spring/2.webp)
+
 1. get bean from singleton cache：首先从 **singleton cache** 获取对象, 如果有, 说明初始化过, 直接返回, 如果没有, 继续
 2. create merged definition：找到 bean 的 definition (bd), 然后生成 merged bean definition (mbd). 这个主要是因为 bd 可以有 parent, 这个步骤的作用就是把 bd 和 它的 parent bd (如果有的话), 进行merge, 生成 mbd, 之后就要根据这个 mbd 来实例化和初始化 bean。
 3. check bean definition：检查 mbd , 把 mbd 中 dependsOn 的 bean 都先初始化.
@@ -73,12 +57,6 @@ DefaultListableBeanFactory 通过 BeanDefinition 定义类, 在第一次 get 时
       * init: 真正的初始化操作。如果 bean 是 InitializingBean, afterPropertiesSet()。调用自定义 init
       * BeanPostProcessor.postProcessAfterInitialization()
     6. register disposable bean
-
-
-
- 
-
-
 
 
 
