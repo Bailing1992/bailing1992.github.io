@@ -40,7 +40,7 @@ DefaultListableBeanFactory 通过 BeanDefinition 定义类, 在第一次 get 时
 4. 使用纯粹的 programmatically 的方式来定义和注册
 
 ###### 配置文件方式实现逻辑
-BeanDefinitionReader 的作用是读取 Spring 配置文件中的内容，将其转换为 IoC 容器内部的数据结构：BeanDefinition。 其抽象类 AbstractBeanDefinitionReader 中有一属性为BeanDefinitionRegistry。BeanDefinitionRegistry 是 DefaultListableBeanFactory 的子类，定义对 BeanDefinition 的各种增删改操作。当调用loadBeanDefinitions 的 loadBeanDefinitions 方法时，会把 BeanDefinition 注册到 BeanDefinitionRegistry。
+BeanDefinitionReader 的作用是读取 Spring 配置文件中的内容，将其转换为 IoC 容器内部的数据结构：BeanDefinition。 其抽象类 AbstractBeanDefinitionReader 中有一属性为BeanDefinitionRegistry。BeanDefinitionRegistry 是 DefaultListableBeanFactory 的子类，定义对 BeanDefinition 的各种增删改操作。当调用loadBeanDefinitions 的 loadBeanDefinitions 方法时， 会把 BeanDefinition 注册到 BeanDefinitionRegistry。
 
 > BeanDefinitionRegistry 接口的实现类 DefaultListableBeanFactory 拥有属性 beanDefinitionMap，通过调用 registerBeanDefinition 方法 把（beanName, beanDefinition）放在 beanDefinitionMap 中。
 ###### 注解方式实现逻辑

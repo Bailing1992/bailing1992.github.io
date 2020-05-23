@@ -8,15 +8,14 @@ tags:
   - spring
 ---
 
-
-> spring ioc 容器功能非常强大，负责 spring bean 的创建和管理等功能。
+> Spring Ioc 容器功能非常强大，负责 Spring Bean 的创建和管理等功能。
 
 > Spring 管理单例模式 bean 的完整生命周期，对于 prototype 的 bean，Spring 在创建好交给使用者之后则不会再管理后续的生命周期。
 
 
 ## 过程
-1. 定义 和 注册 bean
-2. 获取 bean
+1. 定义 和 注册 Bean
+2. 获取 Bean
 
 ## 定义和注册 bean
 定义 BeanDefinition 并注册到 BeanFactory 的这个过程, 就是 bean 的定义和注册 , 通常使用 spring 时并不是把一个 bean 的实例注册, 而是一个 BeanDefinition.
@@ -33,12 +32,12 @@ tags:
 ## Bean 实例化过程(单例模式)
 ![dubbo](/img/spring/2.webp)
 
-1. get bean from singleton cache：首先从 **singleton cache** 获取对象, 如果有, 说明初始化过, 直接返回, 如果没有, 继续
-2. create merged definition：找到 bean 的 definition (bd), 然后生成 merged bean definition (mbd). 这个主要是因为 bd 可以有 parent, 这个步骤的作用就是把 bd 和 它的 parent bd (如果有的话), 进行merge, 生成 mbd, 之后就要根据这个 mbd 来实例化和初始化 bean。
-3. check bean definition：检查 mbd , 把 mbd 中 dependsOn 的 bean 都先初始化.
+1. get bean from singleton cache: 首先从 **singleton cache** 获取对象, 如果有, 说明初始化过, 直接返回, 如果没有, 继续
+2. create merged definition: 找到 bean 的 definition (bd), 然后生成 merged bean definition (mbd). 这个主要是因为 bd 可以有 parent, 这个步骤的作用就是把 bd 和 它的 parent bd (如果有的话), 进行 merge, 生成 mbd, 之后就要根据这个 mbd 来实例化和初始化 bean。
+3. check bean definition: 检查 mbd , 把 mbd 中 dependsOn 的 bean 都先初始化.
 4. get singleton, if not found, then create bean: 再次从 singleton cache 中获取 bean, 如果没有, 则会真正 create bean
   1. resolve class：查找并 load 这个 bean 的 class
-  2. resolveBeforeInstantiation： 在真正的实例化之前进行一次预先操作, 目的是给用户一个机会来进行非正常的实例化, 用户注入的 InstantiationAwareBeanPostProcessor 子类, 可以做一些 proxy, mock, 来取代真实的实例化返回, 如果没有产生 bean, 则继续往下走去正常的实例化阶段.
+  2. resolveBeforeInstantiation: 在真正的实例化之前进行一次预先操作, 目的是给用户一个机会来进行非正常的实例化, 用户注入的 InstantiationAwareBeanPostProcessor 子类, 可以做一些 proxy, mock, 来取代真实的实例化返回, 如果没有产生 bean, 则继续往下走去正常的实例化阶段.
     * InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation()
       * if return bean, BeanPostProcessor.postProcessAfterInitialization(), then return bean.
       * if return null, go on
