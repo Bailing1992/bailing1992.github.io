@@ -199,6 +199,10 @@ public void write(String key,Object data){
 
 
 ## 参考文献
-https://cloud.tencent.com/developer/article/1165508
+
 https://www.jianshu.com/p/e3f5ff55f0fd
-https://www.veaxen.com/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8C%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94.html
+
+[引用自](https://cloud.tencent.com/developer/article/1165508)
+[引用自](https://www.veaxen.com/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8C%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94.html
+)
+
