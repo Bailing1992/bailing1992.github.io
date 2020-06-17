@@ -26,7 +26,7 @@ HTTP 消息 由普通 ASCII 文本组成。消息包括消息头和消息体两�
 
 HTTP协议的长连接和短连接，实质上是TCP协议的长连接和短连接。
 
-## POST与GET的区别
+## POST 与 GET 的区别
 POST 有一个体。GET 与 POST 都能发送参数，但是利用GET的话，对参数数据有限制，参数数据只能是放在请求行的内容。
 ![网络](/img/network/25.png)
 ![网络](/img/network/26.png)
