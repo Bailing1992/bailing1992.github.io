@@ -1,4 +1,4 @@
-Hux Blog
+ BaiLing Blog
 ========
 
-### [View Live Hux Blog &rarr;](https://bailing1992.github.io/)  
+### [View Live BaiLing Blog &rarr;](https://bailing1992.github.io/)  
