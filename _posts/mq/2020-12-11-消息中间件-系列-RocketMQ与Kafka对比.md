@@ -9,30 +9,30 @@ tags:
   - MQ
 ---
 
-> 2011年初，Linkin开源了Kafka这个优秀的消息中间件，淘宝中间件团队在对Kafka做过充分Review之后，Kafka无限消息堆积，高效的持久化速度吸引了我们，但是同时发现这个消息系统主要定位于日志传输，对于使用在淘宝交易、订单、充值等场景下还有诸多特性不满足，为此重新用Java语言编写了RocketMQ，定位于非日志的可靠消息传输（日志场景也OK）
+> 2011 年初， Linkin 开源了 Kafka 这个优秀的消息中间件，淘宝中间件团队在对 Kafka 做过充分 Review 之后，Kafka 无限消息堆积，高效的持久化速度吸引了我们，但是同时发现这个消息系统主要定位于日志传输，对于使用在淘宝交易、订单、充值等场景下还有诸多特性不满足，为此重新用 Java 语言编写了 RocketMQ，定位于非日志的可靠消息传输。
 
 ## 特征对比
 #### 数据可靠性
-* RocketMQ支持异步实时刷盘，同步刷盘，同步复制，异步复制
-* Kafka使用异步刷盘方式，异步复制/同步复制
+* RocketMQ 支持异步刷盘，同步刷盘，同步复制，异步复制
+* Kafka 使用异步刷盘方式，异步复制/同步复制
 
-> 总结：RocketMQ的同步刷盘在单机可靠性上比Kafka更高，不会因为操作系统Crash，导致数据丢失。Kafka同步Replication理论上性能低于RocketMQ的同步Replication，原因是Kafka的数据以分区为单位组织，意味着一个Kafka实例上会​​有几百个数据分区，RocketMQ一个实例上只有一个数据分区，RocketMQ可以充分利用IO组Commit机制，批量传输数据，配置同步Replication与异步Replication相比，性能损耗约20%~30%.
+> 总结：RocketMQ 的同步刷盘在单机可靠性上比 Kafka 更高，不会因为操作系统 Crash，导致数据丢失。Kafka 同步 Replication 理论上性能低于 RocketMQ 的同步 Replication，原因是 Kafka 的数据以分区为单位组织，意味着一个 Kafka 实例上会​​有几百个数据分区，RocketMQ 一个实例上只有一个数据分区，RocketMQ 可以充分利用 IO 组 Commit 机制，批量传输数据，配置同步 Replication 与异步 Replication 相比，性能损耗约 20%~30%.
 
 #### 性能对比
 
-* Kafka 单机写入TPS约在百万条/秒，消息大小10个字节
-* RocketMQ 单机写入TPS: 单实例约7万条/秒，单机部署3个Broker，可以跑到最高12万条/秒，消息大小10个字节
+* Kafka 单机写入 TPS 约在百万条/秒，消息大小10个字节
+* RocketMQ 单机写入 TPS: 单实例约 7 万条/秒，单机部署 3 个 Broker，可以跑到最高12万条/秒，消息大小10个字节
 
-总结：Kafka的TPS跑到单机百万，主要是由于Producer端将多个小消息合并，批量发向Broker。
+总结：Kafka的 TPS 跑到单机百万，主要是由于 Producer 端将多个小消息合并，批量发向 Broker。
 
 > RocketMQ 为什么不支持 Producer 端将多个小消息合并？
-1. Producer 通常使用的Java语言，缓存过多消息，GC是个很严重的问题
-2. Producer 调用发送消息接口，消息未发送到Broker，向业务返回成功，此时Producer宕机，会导致消息丢失，业务出错
-3. Producer 通常为分布式系统，且每台机器都是多线程发送，我们认为线上的系统单个Producer每秒产生的数据量有限，不可能上万。
+1. Producer 通常使用的 Java 语言，缓存过多消息，GC 是个很严重的问题
+2. Producer 调用发送消息接口，消息未发送到Broker，向业务返回成功，此时 Producer 宕机，会导致消息丢失，业务出错
+3. Producer 通常为分布式系统，且每台机器都是多线程发送，我们认为线上的系统单个 Producer 每秒产生的数据量有限，不可能上万。
 4. 缓存的功能完全可以由上层业务完成。
 
 #### 单机支持的队列数
-* Kafka单机超过64个队列/分区，Load会发生明显的飙高现象，队列越多，load越高，发送消息响应时间变长。Kafka分区数无法过多的问题
+* Kafka单机超过 64 个队列/分区，Load 会发生明显的飙高现象，队列越多，load越高，发送消息响应时间变长。Kafka分区数无法过多的问题
 * RocketMQ单机支持最高5万个队列，负载不会发生明显变化
 
 > 队列多有什么好处？
@@ -97,7 +97,7 @@ MySQL的二进制日志分发需要严格的消息顺序
 理论上Kafka要比RocketMQ的堆积能力更强，不过RocketMQ单机也可以支持亿级的消息堆积能力，我们认为这个堆积能力已经完全可以满足业务需求。
 
 ## 架构设计对比
-#### namesrv VS zk
+#### Namesrv VS zk
 Kafka 通过 zookeeper 来进行协调，而rocketMq通过自身的namesrv进行协调。
 
 RocketMQ 在协调节点的设计上显得更加轻量，用了另外一种方式解决高可用的问题，思路也是可以借鉴的。

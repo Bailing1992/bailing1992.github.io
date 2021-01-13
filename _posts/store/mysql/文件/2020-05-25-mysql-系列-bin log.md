@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "MySQL 系列 redo 日志"
+title: "MySQL 系列 bin 日志"
 subtitle: 'MySQL 技术内幕：InnoDB存储引擎'
 author: "lichao"
 header-img: "img/post-bg-2015.jpg"
@@ -9,6 +9,15 @@ tags:
   - MySQL
 ---
 
+MySQL 的二进制日志（binary log）是一个二进制文件，主要记录所有数据库表结构变更（例如CREATE、ALTER TABLE…）以及表数据修改（INSERT、UPDATE、DELETE…）的所有操作。二进制日志（binary log）中记录了对 MySQL 数据库执行更改的所有操作，并且记录了语句发生时间、执行时长、操作数据等其它额外信息，但是它不记录 SELECT、SHOW 等那些不修改数据的 SQL 语句。
+
+
+#### 作用
+* 恢复：某些数据的恢复需要二进制日志，例如，在一个数据库全备文件恢复后，用户可通过二进制日志进行point-in-time 的恢复。
+* 复制：通过复制和执行二进制日志使一台远程的 Mysql 数据库（一般称为slave）与一台 MySQL 数据库（一般称为 master）进行实时同步。
+* 审计：用户可以通过二进制日志中的信息来进行审计，判断是否对数据库进行了注入的攻击。
+
+除了上面介绍的几个作用外，binlog对于事务存储引擎的崩溃恢复也有非常重要的作用。在开启binlog的情况下，为了保证binlog与redo的一致性，MySQL将采用事务的两阶段提交协议。当MySQL系统发生崩溃时，事务在存储引擎内部的状态可能为prepared和commit两种。对于prepared状态的事务，是进行提交操作还是进行回滚操作，这时需要参考binlog：如果事务在binlog中存在，那么将其提交；如果不在binlog中存在，那么将其回滚，这样就保证了数据在主库和从库之间的一致性。
 
 二进制日志是在 存储引擎的上层产生的，不管是什么存储引擎，对数据库进行了修改都会产生二进制日志。
 
