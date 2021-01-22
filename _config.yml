@@ -5,7 +5,7 @@ header-img: img/post-bg-universe.jpg
 email: lc_bailing@126.com
 description: "人间有味是清欢"
 keyword: "李超, BIT, 互联网, Web"
-url: "https://bailing1992.github.io/"              # your host, for absolute URL
+url: "http://bailing1992.github.io/"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
@@ -59,7 +59,7 @@ kramdown:
 
 
 # Disqus settings
-disqus_username: hux
+# disqus_username: hux
 
 # Netease settings
 netease_comment: false
