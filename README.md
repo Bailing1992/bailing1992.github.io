@@ -1,4 +1,4 @@
- BaiLing Blog
+Li Chao Blog
 ========
 
-### [View Live BaiLing Blog &rarr;](https://bailing1992.github.io/)  
+### [View Li Chao Blog &rarr;](https://bailing1992.github.io/)  
