@@ -9,7 +9,7 @@ tags:
   - MySQL
 ---
 
-undo log 有两个作用：提供回滚和多个行版本控制(MVCC)。
+```undo log``` 有两个作用：提供回滚和多个行版本控制(MVCC)。
 
 undo 存放在数据库内部的一个特殊段中，这个段称为 undo 段，位于共享表空间中。
 
@@ -17,4 +17,4 @@ undo log 和 redo log 记录物理日志不一样，它是逻辑日志。可以�
 
 undo 的另一个作用是 MVCC，即在 InnoDB 存储引擎中 MVCC 的实现是通过 undo 来完成。当用户读取一行记录时，若该记录已经被其他事务占用，当前事务可以通过 undo 读取之前的行版本信息，以此实现非锁定读取。
 
-undo log会产生redo log，只是因为 undo log 也需要持久性保护。
+undo log 会产生 redo log，只是因为 undo log 也需要持久性保护。
