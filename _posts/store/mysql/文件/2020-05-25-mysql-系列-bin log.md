@@ -3,7 +3,7 @@ layout: post
 title: "MySQL 系列 bin 日志"
 subtitle: 'MySQL 技术内幕：InnoDB存储引擎'
 author: "lichao"
-header-img: "img/post-bg-2015.jpg"
+header-img: "img/background/mac.jpg"
 catalog: true
 tags:
   - MySQL
@@ -50,3 +50,5 @@ write 和 fsync 的时机，是由参数 sync_binlog 控制的：
 ## sync_binlog 参数配置
 0：刷新binlog_cache中的信息到磁盘由 os 决定。
 N：每 N 次事务提交刷新 binlog_cache 中的信息到磁盘。
+
+## 
