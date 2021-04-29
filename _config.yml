@@ -78,7 +78,7 @@ ga_domain: huangxuan.me
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "For the next quantum leap<br>人间有味是清欢"
+sidebar-about-description: "Pleasure derived from simplicity is the true happiness in life.<br>人间有味是清欢"
 sidebar-avatar: /img/packshot.png # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
