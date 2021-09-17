@@ -6,5 +6,5 @@ author: "lichao"
 header-img: "img/background/锁.jpg"
 catalog: true
 tags:
-  - MySQL
+  - mysql
 ---
