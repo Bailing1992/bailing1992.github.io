@@ -6,7 +6,7 @@ author: "lichao"
 header-img: "img/post-bg-2015.jpg"
 catalog: true
 tags:
-  - MySQL
+  - mysql
 ---
 
 > 只有在数据库异常 crash 时，需要使用 redo log 恢复数据。

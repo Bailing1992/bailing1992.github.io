@@ -6,7 +6,7 @@ author: "lichao"
 header-img: "img/post-bg-2015.jpg"
 catalog: true
 tags:
-  - MySQL
+  - mysql
 ---
 
 ```undo log``` 保存了事务发生之前的数据的一个版本，可以用于回滚，同时可以提供多版本并发控制下的读（MVCC），也即非锁定读。

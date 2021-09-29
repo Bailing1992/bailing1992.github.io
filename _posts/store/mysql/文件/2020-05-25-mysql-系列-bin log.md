@@ -6,7 +6,7 @@ author: "lichao"
 header-img: "img/background/mac.jpg"
 catalog: true
 tags:
-  - MySQL
+  - mysql
 ---
 
 MySQL 归档日志（binlog）是二进制日志，主要记录所有数据库表结构变更（例如CREATE、ALTER TABLE…）以及表数据修改（INSERT、UPDATE、DELETE …）的所有操作。二进制日志（binary log）中记录了对 MySQL 数据库执行更改的所有操作，并且记录了语句发生时间、执行时长、操作数据等其它额外信息，但是它不记录 SELECT、SHOW 等那些不修改数据的 SQL 语句。
