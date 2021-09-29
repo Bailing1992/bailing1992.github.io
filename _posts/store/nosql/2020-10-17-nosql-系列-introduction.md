@@ -6,7 +6,7 @@ author: "lichao"
 header-img: "img/post-bg-rwd.jpg"
 catalog: true
 tags:
-  - NoSql 
+  - nosql 
 ---
 
 > NoSql 可以理解为 一个通用的分布式键值存储系统。

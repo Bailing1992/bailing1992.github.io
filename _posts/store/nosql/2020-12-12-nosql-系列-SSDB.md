@@ -6,5 +6,5 @@ author: "lichao"
 header-img: "img/post-bg-rwd.jpg"
 catalog: true
 tags:
-  - NoSql 
+  - nosql 
 ---
