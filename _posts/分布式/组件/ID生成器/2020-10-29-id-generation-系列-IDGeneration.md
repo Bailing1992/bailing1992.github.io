@@ -6,7 +6,7 @@ author: "lichao"
 header-img: "img/post-bg-rwd.jpg"
 catalog: true
 tags:
-  - other 
+  - distribute 
 ---
 
 目前主流的分布式id生成方案都有第三方组件依赖，如：基于zk、基于mysql、基于缓存 
