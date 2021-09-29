@@ -6,7 +6,7 @@ author: "lichao"
 header-img: "img/post-bg-rwd.jpg"
 catalog: true
 tags:
-  - Java 
+  - java 
 ---
 
 1. 在JDK 1.7 中，当并发执行扩容操作时会造成环形链和数据丢失的情况。

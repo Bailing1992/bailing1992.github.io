@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title: "Java基础 系列 ArrayList"
@@ -8,6 +7,7 @@ catalog: true
 tags:
   - java
 ---
+
 > 线程不安全的数组容器。
 
 ## ArrayList插入删除
