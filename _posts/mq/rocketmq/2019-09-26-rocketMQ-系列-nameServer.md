@@ -6,7 +6,7 @@ author: "lichao"
 header-img: "img/post-bg-rwd.jpg"
 catalog: true
 tags:
-  - rocketMQ
+  - rocket_mq
 ---
 
 > 本文主要介绍 RocketMQ 路由管理、服务注册及服务发现的机制。RocketMQ 的架构设计决定了只需要一个轻量级的元数据服务器就足够了，只需要保持最终一致，而不需要 Zookeeper这样的强一致性解决方案，不需要再依赖另一个中间件，从而减少整体维护成本。
