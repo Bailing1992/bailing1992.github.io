@@ -2,7 +2,7 @@
 layout: post
 title: "Dubbo 系列 扩展组件"
 author: "lichao"
-header-img: "img/netty/host.png"
+header-img: "img/post/bg/host.png"
 catalog: true
 tags:
   - dubbo

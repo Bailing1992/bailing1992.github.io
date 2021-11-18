@@ -3,7 +3,7 @@ layout: post
 title: "并发编程 系列 Synchronized"
 subtitle: '开启 并发编程 新篇章'
 author: "lichao"
-header-img: "img/post-bg-rwd.jpg"
+header-img: "img/post/bg/post-bg-rwd.jpg"
 catalog: true
 tags:
   - concurrent 

@@ -3,7 +3,7 @@ layout: post
 title: "并发编程 系列 CopeOnWriteArrayList"
 subtitle: '开启并发编程探索新篇章'
 author: "lichao"
-header-img: "img/post-bg-2015.jpg"
+header-img: "img/post/bg/post-bg-2015.jpg"
 catalog: true
 tags:
   - concurrency

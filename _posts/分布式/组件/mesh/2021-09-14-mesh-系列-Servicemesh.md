@@ -3,7 +3,7 @@ layout: post
 title: "mesh 系列 Service Mesh概述"
 subtitle: 'Servicemesh概述...'
 author: "lichao"
-header-img: "img/post-bg-rwd.jpg"
+header-img: "img/post/bg/post-bg-rwd.jpg"
 catalog: true
 tags:
   - mesh 

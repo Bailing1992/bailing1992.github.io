@@ -3,7 +3,7 @@ layout: post
 title: "分布式 ID 生成器"
 subtitle: '分析分布式 ID 生成器'
 author: "lichao"
-header-img: "img/post-bg-rwd.jpg"
+header-img: "img/post/bg/post-bg-rwd.jpg"
 catalog: true
 tags:
   - distribute 

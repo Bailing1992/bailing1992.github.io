@@ -3,7 +3,7 @@ layout: post
 title: "RocketMQ 系列 NameServer"
 subtitle: '刨析 RocketMQ 的底层实现'
 author: "lichao"
-header-img: "img/post-bg-rwd.jpg"
+header-img: "img/post/bg/post-bg-rwd.jpg"
 catalog: true
 tags:
   - rocket_mq

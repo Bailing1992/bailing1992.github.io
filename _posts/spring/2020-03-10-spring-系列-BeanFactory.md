@@ -2,7 +2,7 @@
 layout: post
 title: "Spring 系列 BeanFactory"
 author: "lichao"
-header-img: "img/netty/host.png"
+header-img: "img/post/bg/post-bg-distance.png"
 catalog: true
 tags:
   - spring

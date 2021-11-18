@@ -2,7 +2,7 @@
 layout: post
 title: "Java基础 系列 ArrayList"
 author: "lichao"
-header-img: "img/netty/host.png"
+header-img: "img/post/bg/netty/host.png"
 catalog: true
 tags:
   - java

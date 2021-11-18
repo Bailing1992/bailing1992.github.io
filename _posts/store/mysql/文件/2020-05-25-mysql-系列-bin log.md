@@ -3,7 +3,7 @@ layout: post
 title: "MySQL 系列 bin 日志"
 subtitle: 'MySQL 技术内幕：InnoDB存储引擎'
 author: "lichao"
-header-img: "img/background/mac.jpg"
+header-img: "img/post/bg/mac.jpg"
 catalog: true
 tags:
   - mysql

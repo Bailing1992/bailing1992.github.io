@@ -3,7 +3,7 @@ layout: post
 title: "MySQL 系列 undo 日志"
 subtitle: 'MySQL 技术内幕：InnoDB存储引擎'
 author: "lichao"
-header-img: "img/post-bg-2015.jpg"
+header-img: "img/post/bg/post-bg-2015.jpg"
 catalog: true
 tags:
   - mysql

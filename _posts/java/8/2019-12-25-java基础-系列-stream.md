@@ -3,7 +3,7 @@ layout: post
 title: "Java 基础 Stream"
 subtitle: '深究 Java 基础'
 author: "lichao"
-header-img: "img/post-bg-rwd.jpg"
+header-img: "img/post/bg/post-bg-rwd.jpg"
 catalog: true
 tags:
   - java 

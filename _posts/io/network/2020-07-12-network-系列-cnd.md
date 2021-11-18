@@ -3,7 +3,7 @@ layout: post
 title: "网络 系列 CDN"
 subtitle: '开启 网络 探索新篇章'
 author: "lichao"
-header-img: "img/post-bg-rwd.jpg"
+header-img: "img/post/bg/post-bg-rwd.jpg"
 catalog: true
 tags:
   - network 
