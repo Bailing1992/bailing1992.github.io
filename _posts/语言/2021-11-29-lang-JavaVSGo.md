@@ -3,7 +3,7 @@ layout: post
 title: "Lang 系列 Java vs Go"
 subtitle: '对 Java 和 Go 这两门编程语言和生态做一些对比，希望能够给大家足够信息进行决策。'
 author: "lichao"
-header-img: "img/post/bg/post-bg-digital-native.jpg"
+header-img: "img/post/bg/post-bg-夕阳.jpeg"
 catalog: true
 tags:
   - lang
