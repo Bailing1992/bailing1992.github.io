@@ -9,6 +9,7 @@ tags:
   - zookeeper 
 ---
 
+
 Zookeeper 是一个开源的分布式协同服务系统，Zookeeper 的设计目标是将那些复杂且容易出错的分布式协同服务封装起来，抽象出一个高效可靠的原语集，并以一系列简单的接口提供给用户使用。
 
 #### 应用场景
@@ -21,14 +22,11 @@ Zookeeper 提供了 Master 选举、分布式锁、配置管理（数据发布�
 
 协同并不总是采取像群首选举或者加锁等同步原语的形式。配置元数据也是一个进程通知其他进程需要做什么的一种常用方式。比如，在一个主-从系统中，从节点需要知道任务已经分配到它们。即使在主节点发生崩溃的情况下，这些信息也需要有效。
 
-#### 整体架构
+#### 高可用架构(ZAB)
 
 ![架构](/img/post/store/zk/架构.png){:height="80%" width="80%"}
 
---- 
-
-**异常发现：**      
-Zookeeper 中的 Leader 会定期向 Follower 发送心跳，如果 Follower 超出一定时间（syncLimit * tickTime）没有响应，Leader 会仍将该 Follower 移除下线；同样地，Follower 长期没有收到 Leader 的心跳，会认为 Leader 下线，从而触发选举。
+Zookeeper 中的 Leader 会定期向 Follower 发送心跳，如果 Follower 超出一定时间（```syncLimit * tickTime```）没有响应，Leader 会将该 Follower 移除下线；同样地，Follower 长期没有收到 Leader 的心跳，会认为 Leader 下线，从而触发选举。
 选举时，当有过半 Follower 投票给某一个 Follower 时，该 Follower 即晋升为新 Leader；一些细节：
 - 每个 Follower 都会有当前复制 Leader 的进度偏移值（zxid），偏移值越大代表数据越新，Follower 不会投票给比自己偏移值小的 Follower，最终选出的新Leader 会包含已经 Commited 的所有数据。
 - Follower可以更改自己的投票，比如Follower4一开始投给自己，后来收到Follower1的消息后，重新投给1，而且进行广播，告诉别人自己投了1。
