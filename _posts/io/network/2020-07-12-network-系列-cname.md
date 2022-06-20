@@ -17,4 +17,4 @@ CNAME 记录必须指向另一个域名，而不能是 IP 地址。
 
 
 ## 参考文献
-https://zh.wikipedia.org/wiki/CNAME%E8%AE%B0%E5%BD%95
+[CNAME记录](https://zh.wikipedia.org/wiki/CNAME%E8%AE%B0%E5%BD%95)
