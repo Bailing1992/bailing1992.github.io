@@ -39,17 +39,19 @@ fork 和 cow。fork 是指 Redis 通过创建子进程来进行 ```bgsave``` 操
 
 Redis 为了平衡时间和空间，采用了惰性过期和定期过期后两种策略。
 
-[了解更多]()
+[了解更多](https://bailing1992.github.io/2020/05/29/redis-%E7%B3%BB%E5%88%97-%E8%BF%87%E6%9C%9F%E6%B8%85%E7%90%86/)
 
 
 **内存淘汰策略**           
-1. noeviction：当内存使用超过配置的时候会返回错误，不会驱逐任何键
-2. allkeys-lru：加入键的时候，如果过限，首先通过LRU算法驱逐最久没有使用的键
-3. volatile-lru：加入键的时候如果过限，首先从设置了过期时间的键集合中驱逐最久没有使用的键
-4. allkeys-random：加入键的时候如果过限，从所有key随机删除
-5. volatile-random：加入键的时候如果过限，从过期键的集合中随机驱逐
-6. volatile-ttl：从配置了过期时间的键中驱逐马上就要过期的键
-7. volatile-lfu：从所有配置了过期时间的键中驱逐使用频率最少的键
-8. allkeys-lfu：从所有键中驱逐使用频率最少的键
+1. noeviction：当内存使用超过配置的时候会返回错误，不会驱逐任何键。
+2. allkeys-lru：首先通过 LRU 算法驱逐最久没有使用的键。
+3. volatile-lru：首先从设置了过期时间的键集合中驱逐最久没有使用的键。
+4. allkeys-random：从所有 key 随机删除。
+5. volatile-random：从过期键的集合中随机驱逐。
+6. volatile-ttl：从配置了过期时间的键中驱逐马上就要过期的键。
+7. volatile-lfu：从所有配置了过期时间的键中驱逐使用频率最少的键。
+8. allkeys-lfu：从所有键中驱逐使用频率最少的键。
+
+[了解更多](https://bailing1992.github.io/2019/12/24/redis-%E7%B3%BB%E5%88%97-%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0/)
 
 
