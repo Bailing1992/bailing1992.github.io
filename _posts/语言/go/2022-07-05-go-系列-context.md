@@ -192,6 +192,6 @@ func TestJob(t *testing.T) {
 3. Log 尽量带上 ctx 可以根据 logid 追踪日志
 
 ## 拓展阅读 
-https://draveness.me/golang/docs/part3-runtime/ch06-concurrency/golang-context/
+[golang context](https://draveness.me/golang/docs/part3-runtime/ch06-concurrency/golang-context/)
 
-https://qcrao.com/2019/06/12/dive-into-go-context/
+[dive-into-go-context](https://qcrao.com/2019/06/12/dive-into-go-context/)
