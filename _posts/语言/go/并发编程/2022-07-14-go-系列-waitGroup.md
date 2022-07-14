@@ -74,3 +74,18 @@ func (wg *WaitGroup) Wait() {
 }
 ```
 这里用到了 CAS 算法保证有多个 goroutine 同时执行 Wait() 时也能正确累加 waiter。
+####  Done()
+Done()只做一件事，即把counter减1，我们知道Add()可以接受负值，所以Done实际上只是调用了Add(-1)。 
+
+源码如下：
+```go
+func (wg *WaitGroup) Done() {
+	wg.Add(-1)
+}
+```
+Done()的执行逻辑就转到了Add()，实际上也正是最后一个完成的goroutine把等待者唤醒的。
+
+
+## 编程Tips
+- Add()操作必须早于Wait(), 否则会panic 
+- Add()设置的值必须与实际等待的goroutine个数一致，否则会panic
