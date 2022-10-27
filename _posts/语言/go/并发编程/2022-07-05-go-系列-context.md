@@ -1,6 +1,7 @@
 ---
 layout: post
-title: "Go 系列 context标准库"
+title: "Go 系列 Context 标准库"
+subtitle: "Context 顾名思义是协程的上下文，主要用于跟踪协程的状态，可以做一些简单的协程控制，也能记录一些协程信息"
 author: "lichao"
 header-img: "img/post/bg/post-bg-ngon-ngu-golang.jpg"
 catalog: true
@@ -9,11 +10,117 @@ tags:
 ---
 
 
-> context 设计目的是跟踪 goroutine 调用树，并在这些 goroutine 调用树中传递通知与元数据。context 包提供的核心功能是多个 goroutine 之间的退出通知机制，传递数据只是一个辅助功能，应谨慎使用 context 传递数据。
+> Context 设计目的是跟踪 goroutine 调用树，并在这些 goroutine 调用树中传递通知与元数据。
+> Context 提供的核心功能是多个 goroutine 之间的退出通知机制，传递数据只是一个辅助功能，应谨慎使用 context 传递数据。
+
+## 基础用法
+接下来介绍 Context 的基础用法，最为重要的就是 3 个基础能力，**取消、超时、附加值**。
+
+**（一）新建一个Context**
+
+```go
+ctx := context.TODO()
+ctx := context.Background()
+```
+这两个方法返回的内容是一样的，都是返回一个空的 context，这个 context 一般用来做父 context。
+
+**（二）WithCancel**
+
+```go
+// 函数声明
+func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
+// 用法:返回一个子Context和主动取消函数
+ctx, cancel := context.WithCancel(parentCtx)
+```
+
+这个函数相当重要，会根据传入的context生成一个子context和一个取消函数。当父context有相关取消操作，或者直接调用cancel函数的话，子context就会被取消。
+
+举个日常业务中常用的例子：
+
+```go
+// 一般操作比较耗时或者涉及远程调用等，都会在输入参数里带上一个ctx，这也是公司代码规范里提倡的
+func Do(ctx context.Context, ...) {
+  ctx, cancel := context.WithCancel(parentCtx)
+  
+  // 实现某些业务逻辑
+  
+  // 当遇到某种条件，比如程序出错，就取消掉子Context，这样子Context绑定的协程也可以跟着退出
+  if err != nil {
+    cancel()
+  }
+}
+```
+
+**（三）WithTimeout**
+
+```go
+// 函数声明
+func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)
+// 用法：返回一个子Context（会在一段时间后自动取消），主动取消函数
+ctx := context.WithTimeout(parentCtx, 5*time.Second)
+```
+
+这个函数在日常工作中使用得非常多，简单来说就是给 Context 附加一个超时控制，当超时 ```ctx.Done()``` 返回的 channel 就能读取到值，协程可以通过这个方式来判断执行时间是否满足要求。
+
+举个日常业务中常用的例子：
+```go
+// 一般操作比较耗时或者涉及远程调用等，都会在输入参数里带上一个ctx，这也是公司代码规范里提倡的
+func Do(ctx context.Context, ...) {
+  ctx := context.WithTimeout(parentCtx, 5*time.Second)
+  
+  // 实现某些业务逻辑
+
+  for {
+    select {
+     // 轮询检测是否已经超时
+      case <-ctx.Done():
+        return
+      // 有时也会附加一些错误判断
+      case <-errCh:
+        cancel()
+      default:
+    }
+  }
+
+}
+```
+现在大部分 go 库都实现了超时判断逻辑，只需要传入 ctx 就好。
+
+**（四）WithDeadline**
+
+```go
+// 函数声明
+func WithDeadline(parent Context, d time.Time) (Context, CancelFunc)
+// 用法：返回一个子Context（会在指定的时间自动取消），主动取消函数
+ctx, cancel := context.WithDeadline(parentCtx, time.Now().Add(5*time.Second))
+```
+这个函数感觉用得比较少，和WithTimeout相比的话就是使用的是截止时间。
 
 
-#### Context 源码
-**Context 接口: **
+**（五）WithValue**
+
+```go
+// 函数声明
+func WithValue(parent Context, key, val interface{}) Context
+// 用法: 传入父Context和(key, value)，相当于存一个kv
+ctx := context.WithValue(parentCtx, "name", 123)
+// 用法：将key对应的值取出
+v := ctx.Value("name")
+```
+这个函数常用来保存一些链路追踪信息，比如 API 服务里会有来保存一些来源 ip、请求参数等。
+
+因为这个方法实在是太常用了，比如```grpc-go```里的 metadata 就使用这个方法将结构体存储在 ctx 里。
+
+
+```go
+func NewOutgoingContext(ctx context.Context, md MD) context.Context {
+    return context.WithValue(ctx, mdOutgoingKey{}, rawMD{md: md})
+}
+```
+#### 
+
+## 源码实现
+context.Context是一个接口，源码里是有多种不同的实现的，借此实现不同的功能。
 
 ```go
 type Context interface {
