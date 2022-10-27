@@ -13,6 +13,20 @@ tags:
 > Context 设计目的是跟踪 goroutine 调用树，并在这些 goroutine 调用树中传递通知与元数据。
 > Context 提供的核心功能是多个 goroutine 之间的退出通知机制，传递数据只是一个辅助功能，应谨慎使用 context 传递数据。
 
+
+**Context们是一棵树**
+![wait group](/img/post/lang/go/ctx树.jpg)
+
+context 整体是一个树形结构，不同的 ctx 间可能是兄弟节点或者是父子节点的关系。
+
+同时由于 Context 接口有多种不同的实现，所以树的节点可能也是多种不同的 ctx 实现。总的来说我觉得 Context 的特点是：
+- 树形结构，每次调用WithCancel, WithValue, WithTimeout, WithDeadline实际是为当前节点在追加子节点。
+
+继承性，某个节点被取消，其对应的子树也会全部被取消。
+
+多样性，节点存在不同的实现，故每个节点会附带不同的功能。
+
+
 ## 基础用法
 接下来介绍 Context 的基础用法，最为重要的就是 3 个基础能力，**取消、超时、附加值**。
 
@@ -132,6 +146,11 @@ type Context interface {
 ```
 
 Done() 返回一个空只读 channel，可以表示 context 被取消的信号：当这个 channel 被关闭时，说明 context 被取消了。这是一个只读的channel， 读一个关闭的 channel 会读出相应类型的零值。并且源码里没有地方会向这个 channel 里面塞入值（只会close）。因此在子协程里读这个 channel，除非被关闭，否则读不出来任何东西。也正是利用了这一点，子协程从 channel 里读出了值后，就可以做一些收尾工作，尽快退出。同样在父协程中也可以读这个channel，监听子协程的cancel。
+
+
+
+
+
 
 **Canceler 接口**
 
