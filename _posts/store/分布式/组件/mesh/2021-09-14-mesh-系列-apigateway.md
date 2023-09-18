@@ -52,8 +52,6 @@ tags:
 - 无法实现灵活的流量调度
 - 无法实现请求合并
 
-
-
 ## 参考文献
 
 [阿里技术专家：“双11”亿级流量背后的API网关、微服务架构实践！](https://mp.weixin.qq.com/s?__biz=MzA5MjE3NDQ1Mw==&mid=2649704551&idx=3&sn=0b84432e5b854d7a803fb6b0b7023c01&chksm=886ac97dbf1d406bd233a651df547ff7a043f5d3116a4978ceefa32d2cc608e28eb3b0f60f33&mpshare=1&scene=1&srcid=&sharer_sharetime=1573533637037&sharer_shareid=0c4375dcbf29d7a097022333def16a5e#rd)
