@@ -22,4 +22,5 @@ undo log 的另一个作用是 MVCC，即在 InnoDB 存储引擎中 MVCC 的实�
 当事务提交之后，undo log 并不能立马被删除，而是放入待清理的链表，由 purge 线程判断是否由其他事务在使用 undo 段中表的上一个事务之前的版本信息，决定是否可以清理 undo log 的日志空间。
 
 ## 参考文献
+
 [MySQL中的重做日志（redo log），回滚日志（undo log），以及二进制日志（binlog）的简单总结](https://www.cnblogs.com/wy123/p/8365234.html)
