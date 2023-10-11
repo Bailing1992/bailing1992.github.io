@@ -9,7 +9,7 @@ tags:
   - mysql
 ---
 
-MySQL 归档日志（binlog）是二进制日志，主要记录所有数据库表结构变更（例如CREATE、ALTER TABLE…）以及表数据修改（INSERT、UPDATE、DELETE …）的所有操作。二进制日志（binary log）中记录了对 MySQL 数据库执行更改的所有操作，并且记录了语句发生时间、执行时长、操作数据等其它额外信息，但是它不记录 SELECT、SHOW 等那些不修改数据的 SQL 语句。
+MySQL 归档日志（binlog）是***二进制日志***，主要记录所有数据库表结构变更（例如CREATE、ALTER TABLE…）以及表数据修改（INSERT、UPDATE、DELETE …）的所有操作。二进制日志（binary log）中记录了对 MySQL 数据库执行更改的所有操作，并且记录了语句发生时间、执行时长、操作数据等其它额外信息，但是它不记录 SELECT、SHOW 等那些不修改数据的 SQL 语句。
 
 默认情况下，二进制日志并不是在每次写的时候同步到磁盘。因此，当数据库所在地操作系统发生宕机时，可能会有最后一部分数据没有写入二进制日志文件中，这会给恢复和复制带来问题。当使用事务的表储存引擎时，所有未提交的二进制日志会被记录到一个缓存中，等该事务提交时直接将缓冲中的二进制日志写入二进制日志文件。
 
@@ -51,5 +51,5 @@ write 和 fsync 的时机，是由参数 sync_binlog 控制的：
 
 ## sync_binlog 参数配置
 
-0：刷新binlog_cache中的信息到磁盘由 os 决定。
-N：每 N 次事务提交刷新 binlog_cache 中的信息到磁盘。
+0：刷新 binlog_cache 中的信息到磁盘由 os 决定。
+N：每 n 次事务提交刷新 binlog_cache 中的信息到磁盘。
