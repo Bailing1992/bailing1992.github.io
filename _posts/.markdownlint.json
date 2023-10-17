@@ -1,1 +1,11 @@
-{ "MD033": { "allowed_elements": ["h2", "span", "tr", "td"] }}
+{ 
+    "MD033": { 
+        "allowed_elements": 
+        ["table", "h2", "span", "tr", "td"] 
+    },
+    "MD013":{
+        "code_block_line_length": 500,  
+        "line_length": 1000 
+      }
+
+}
