@@ -1,0 +1,77 @@
+---
+layout: post
+title: "知识地图"
+subtitle: '...'
+header-img: "img/post/bg/post-bg-2015.jpg"
+catalog: true
+tags:
+  - newsql
+---
+
+
+
+<table>
+    <tr>
+        <td colspan="1" style="text-align: center;vertical-align:middle;">大类</td>
+        <td>小类</td>
+        <td>题目</td>
+    </tr>
+    <tr>
+        <td rowspan="18" style="text-align: center;vertical-align:middle;">分布式基础</td>
+        <td rowspan="4" style="text-align: center;vertical-align:middle;">系统模型</td>
+        <td>拜占庭将军问题</td>
+    </tr>
+    <tr>
+       <td>时间与事件顺序</td>
+    </tr>
+    <tr>
+       <td>分布式网络模型</td>
+    </tr>
+    <tr>
+        <td>分布式鼓掌模型</td>
+    </tr>
+    <tr>
+        <td rowspan="3" style="text-align: center;vertical-align:middle;">分布式理</
+        <td>分布式理论</td>
+        <td>CAP理论</td>
+    </tr>
+     <tr>
+        <td>ACID理论</td>
+    </tr>
+     <tr>
+        <td>BASE理论</td>
+    </tr>
+    <tr>
+        <td rowspan="5" style="text-align: center;vertical-align:middle;">分布式一致性协议</td>
+        <td>Quorum NWR算法</td>
+    </tr>
+     <tr>
+        <td>Raft协议</td>
+    </tr>
+     <tr>
+        <td>Raxos协议</td>
+    </tr>
+    <tr>
+        <td>Zab协议</td>
+    </tr>
+    <tr>
+        <td>Gossip协议</td>
+    </tr>
+    <tr>
+        <td rowspan="3" style="text-align: center;vertical-align:middle;">分布式事物</td>
+        <td>2PC</td>
+    </tr>
+    <tr>
+        <td>3PC</td>
+    </tr>
+    <tr>
+        <td>TCC</td>
+    </tr>
+    <tr>
+        <td rowspan="2" style="text-align: center;vertical-align:middle;">分布式账本</td>
+        <td>PDFT算法</td>
+    </tr>
+    <tr>
+        <td>RDFT算法</td>
+    </tr>
+</table>
