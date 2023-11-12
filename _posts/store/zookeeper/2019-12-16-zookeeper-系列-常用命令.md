@@ -11,21 +11,25 @@ tags:
 
 ## 部署
 
-#### 启动：
-```
+### 启动
+
+```shall
 ./zkServer.sh start ../conf/zoo1.cfg
 ./zkServer.sh start ../conf/zoo2.cfg
 ./zkServer.sh start ../conf/zoo3.cfg
 ```
 
-#### 停止：
-```
+#### 停止
+
+```shall
 ./zkServer.sh stop ../conf/zoo1.cfg
 ./zkServer.sh stop ../conf/zoo2.cfg
 ./zkServer.sh stop ../conf/zoo3.cfg
 ```
-#### 查看状态：
-```
+
+#### 查看状态
+
+```shall
 ./zkServer.sh status ../conf/zoo1.cfg
 ./zkServer.sh status ../conf/zoo2.cfg
 ./zkServer.sh status ../conf/zoo3.cfg
@@ -33,14 +37,17 @@ tags:
 
 #### 登录服务器
 
-```
+```shall
 ./zkCli.sh -server localhost:2181
 ```
 
 ## 命令
+
 ZooKeeper 命令行工具 类似于 Linux 的 shell 环境，但是使用它我们可以简单的对 ZooKeeper 进行访问，数据创建，数据修改等操作。连接到 ZooKeeper 服务，连接成功后，系统会输出 ZooKeeper 的相关环境以及配置信息。
-#### 创建节点
-```
+
+### 创建节点
+
+```shall
 create
 
 [zk: 127.0.0.1:2181(CONNECTED) 5] create /zk "test"
@@ -57,8 +64,10 @@ create /zk/test1 null
 [zk: 127.0.0.1:2181(CONNECTED) 60] create /zk/test2/ null
 Command failed: java.lang.IllegalArgumentException: Path must not end with / character
 ```
-#### 查看节点下的信息
-```
+
+### 查看节点下的信息
+
+```shall
 ls /zk
 
 [zk: 127.0.0.1:2181(CONNECTED) 62] ls /zk
@@ -67,7 +76,7 @@ ls /zk
 
 列出节点下的节点集合和更详细的信息:
 
-```
+```shall
 ls2 /zk
 
 [zk: 127.0.0.1:2181(CONNECTED) 63] ls2 /zk
@@ -85,8 +94,9 @@ dataLength = 4
 numChildren = 2
 ```
 
-#### 获取节点数据
-```
+### 获取节点数据
+
+```shall
 [zk: 127.0.0.1:2181(CONNECTED) 42] get /test1
 "{aaa}"
 
@@ -103,8 +113,9 @@ dataLength = 7
 numChildren = 0
 ```
 
-#### 给节点赋值
-```
+### 给节点赋值
+
+```shall
 [zk: 127.0.0.1:2181(CONNECTED) 43] set /test1 "{bbb}"
 
 cZxid = 0x600000051
@@ -120,8 +131,9 @@ dataLength = 7
 numChildren = 0
 ```
 
-#### 删除节点
-```
+### 删除节点
+
+```shall
 delete /test1
 
 节点不为空不能删除
@@ -136,7 +148,6 @@ delete /zk/test2
 delete /zk
 ```
 
-
 ## 代码实现
 
-https://zhuanlan.zhihu.com/p/80221503
+<https://zhuanlan.zhihu.com/p/80221503>
