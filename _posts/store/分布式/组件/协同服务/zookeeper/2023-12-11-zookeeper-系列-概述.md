@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Zookeeper 系列 概述"
+title: "分布式协同服务 系列 Zookeeper概述"
 subtitle: '一个开源的分布式协同服务'
 author: "lichao"
 header-img: "img/post/bg/post-bg-rwd.jpg"

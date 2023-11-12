@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Zookeeper 系列 常用命令"
+title: "分布式协同服务 系列 Zookeeper"
 subtitle: '开启 Zookeeper 探索新篇章'
 author: "lichao"
 header-img: "img/post/bg/post-bg-rwd.jpg"
