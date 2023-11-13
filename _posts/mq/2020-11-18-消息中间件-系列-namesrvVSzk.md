@@ -10,6 +10,7 @@ tags:
 ---
 
 ## namesrv VS zk
+
 Kafka 通过 zookeeper 来进行协调，而rocketMq通过自身的namesrv进行协调。
 
 RocketMQ 在协调节点的设计上显得更加轻量，用了另外一种方式解决高可用的问题，思路也是可以借鉴的。
