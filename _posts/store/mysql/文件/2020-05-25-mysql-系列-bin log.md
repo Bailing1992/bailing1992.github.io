@@ -28,7 +28,9 @@ MySQL 归档日志（binlog）是***二进制日志***，主要记录所有数�
 ## 写入逻辑
 
 binlog 写入逻辑比较简单：事务执行过程中，先把日志写到 binlog cache，事务提交的时候，再把 binlog cache 写到 binlog 文件中。
+
 一个事务的 binlog 是不能被拆开的，因此不论这个事务多大，也要确保一次性写入。这就涉及到了 binlog cache 的保存问题。
+
 系统给 binlog cache 分配了一片内存，每个线程一个，参数 ```binlog_cache_size``` 用于控制单个线程内 binlog cache 所占内存的大小。如果超过了这个参数规定的大小，就要暂存到磁盘。
 
 事务提交的时候，执行器把 binlog cache 里的完整事务写入到 binlog 中，并清空 binlog cache。状态如下图所示。
@@ -53,3 +55,20 @@ write 和 fsync 的时机，是由参数 sync_binlog 控制的：
 
 0：刷新 binlog_cache 中的信息到磁盘由 os 决定。
 N：每 n 次事务提交刷新 binlog_cache 中的信息到磁盘。
+
+## 主备复制常见问题排查
+
+**主从延迟：**
+
+主从延迟在Binlog数据复制架构下是非常常见的问题，从基本原理上可以看出造成主从延迟的原因有两大方面：
+
+1. IO thread 拉取 Binlog 延迟
+  主从节点之间的网络延迟，拉取Binlog需要跨网络，网络延迟的大小直接决定了拉取Binlog的延迟；在生产环境中，主从之间的网络延迟不会太大，同个region内的跨机房3ms左右；
+
+  另外也可能是大事务瞬间产生大量的Binlog，被节点拉取Binlog延迟，因为拉取Binlog是单线程流式的。
+
+  在实际生成环境中，IO thread 拉取Binlog延迟出现的概率较低。
+2. SQL thread 回放日志延迟
+  SQL thread解析Binlog成SQL事务，然后在从节点回放事务，这是个典型的生产者消费者模型。由于主节点接受业务的写入是并发的写入，从SQL thread消费者跟不上；
+
+  这种情况也是绝大部分延迟的原因，主要是因为业务在使用不当造成：突发写入过大，大事务写入等等。
