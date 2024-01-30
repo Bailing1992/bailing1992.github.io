@@ -11,11 +11,7 @@ tags:
 
 > Redo 初衷是用于性能提升和崩溃恢复；
 
-为了提供更好的读写性能，InnoDB在从磁盘读到page之后，会把page缓存在Buffer Pool中，在经过写入修改之后，这个page就变成了脏页。
-
-为了避免每次都把脏页落盘带来的海量随机写的IO开销，InnoDB是在后台异步的将脏页落盘，这时如果进程或机器崩溃导致内存数据丢失，磁盘上的数据和内存中的会存在不一致。
-
-为了保证数据库本身的一致性和持久性，InnoDB维护了RedoLog，RedoLog是追加写的模式，任何对Page的修改都需要先将变更记录到Redo中，并保证RedoLog早于对应的Page落盘，也就是常说的WAL(Write Ahead Log)。
+为了提供更好的读写性能，InnoDB在从磁盘读到page之后，会把page缓存在Buffer Pool中，在经过写入修改之后，这个page就变成了脏页。为了避免每次都把脏页落盘带来的海量随机写的IO开销，InnoDB是在后台异步的将脏页落盘，这时如果进程或机器崩溃导致内存数据丢失，磁盘上的数据和内存中的会存在不一致。为了保证数据库本身的一致性和持久性，InnoDB维护了RedoLog，RedoLog是追加写的模式，任何对Page的修改都需要先将变更记录到Redo中，并保证RedoLog早于对应的Page落盘，也就是常说的WAL(Write Ahead Log)。
 
 当发生故障导致内存数据丢失后，InnoDB会在重启时重放Redo，将任意Page恢复到崩溃前的状态。
 
@@ -24,16 +20,22 @@ tags:
 - 提升数据库写入效率，把page的随机写，转变成了log的顺序写
 - 保证数据库不丢数据，通过回放增量Redo，将page恢复到崩溃前的状态
 
-接下来，我们看下Redo日志基本格式和类型。
-
-> InnoDB 用日志把随机 IO 变成顺序 IO。一旦日志安全写到磁盘，事务就持久化了，即使断电了，InnoDB 可以重放日志并且恢复已经提交的事务。
->
 > 从重做日志缓冲往磁盘写入时，是按 512 个字节，是按一个扇区的大小进行写入。因为扇区是写入的最小单位，因此可以保证写入必然是成功的。因此在重做日志的写入过程中不需要有二次写。
+
+InnoDB的redo log是固定大小的，比如可以配置为一组4个文件，每个文件的大小是1GB，那么总共就可以记录4GB的操作。从头开始写，写到末尾就又回到开头循环写，如下面这个图所示。
+
+![redo_log_file](/img/post/mysql/redo_log_file.png){:height="70%" width="70%"}
+
+write pos是当前记录的位置，一边写一边后移，写到第3号文件末尾后就回到0号文件开头。checkpoint是当前要擦除的位置，也是往后推移并且循环的，擦除记录前要把记录更新到数据文件。
+
+write pos和checkpoint之间的空间是还空着的部分，可以用来记录新的操作。如果write pos追上checkpoint，表示空间满了，这时候不能再执行新的更新，得停下来先擦掉一些记录，把checkpoint推进一下。
+
+有了redo log，InnoDB就可以保证即使数据库发生异常重启，之前提交的记录都不会丢失，这个能力称为**crash-safe**。
 
 ## Redo日志的格式和类型
 
 1. **作用于 Page 的 Redo**
-  大部分的用户操作都是此类，比如 `MLOG_REC_INSERT`、`MLOG_REC_UPDATE_IN_PLACE`、`MLOG_REC_DELETE`三种类型分别对应于Page中记录的插入，修改以及删除。
+  大部分的用户操作都是此类，比如 `MLOG_REC_INSERT`、`MLOG_REC_UPDATE_IN_PLACE`、`MLOG_REC_DELETE`三种类型分别对应于Page中记录的插入、修改以及删除。
   ![redo log存储过程](/img/post/mysql/rodo_log.png){:height="80%" width="80%"}
   上图以`MLOG_REC_UPDATE_IN_PLACE`为例，Type就是`MLOG_REC_UPDATE_IN_PLACE`类型，Space ID和Page Number唯一标识一个Page页，这三项是所有REDO记录都需要有的头信息。后面的是`MLOG_REC_UPDATE_IN_PLACE`类型独有的，其中Record Offset用给出要修改的记录在Page中的位置偏移，Update Field Count说明记录里有几个Field要修改，紧接着对每个Field给出了Field编号(Field Number)，数据长度（Field Data Length）以及数据（Filed Data）
 2. **作用于 Space 的 Redo**
