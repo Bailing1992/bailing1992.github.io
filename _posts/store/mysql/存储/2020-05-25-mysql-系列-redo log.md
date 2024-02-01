@@ -32,38 +32,6 @@ write pos和checkpoint之间的空间是还空着的部分，可以用来记录�
 
 有了redo log，InnoDB就可以保证即使数据库发生异常重启，之前提交的记录都不会丢失，这个能力称为**crash-safe**。
 
-## Redo日志的格式和类型
-
-1. **作用于 Page 的 Redo**
-  大部分的用户操作都是此类，比如 `MLOG_REC_INSERT`、`MLOG_REC_UPDATE_IN_PLACE`、`MLOG_REC_DELETE`三种类型分别对应于Page中记录的插入、修改以及删除。
-  ![redo log存储过程](/img/post/mysql/rodo_log.png){:height="80%" width="80%"}
-  上图以`MLOG_REC_UPDATE_IN_PLACE`为例，Type就是`MLOG_REC_UPDATE_IN_PLACE`类型，Space ID和Page Number唯一标识一个Page页，这三项是所有REDO记录都需要有的头信息。后面的是`MLOG_REC_UPDATE_IN_PLACE`类型独有的，其中Record Offset用给出要修改的记录在Page中的位置偏移，Update Field Count说明记录里有几个Field要修改，紧接着对每个Field给出了Field编号(Field Number)，数据长度（Field Data Length）以及数据（Filed Data）
-2. **作用于 Space 的 Redo**
-  这类REDO针对一个Space文件的修改，如`MLOG_FILE_CREATE`，`MLOG_FILE_DELETE`，`MLOG_FILE_RENAME`分别对应对一个`Space`的创建，删除以及重命名。
-  ![redo log存储过程](/img/post/mysql/redo_log_mlog.png){:height="80%" width="80%"}
-  上图以MLOG_FILE_CREATE为例，前三个字段还是Type，Space ID和Page Number，由于是针对Space的操作，这里的Page Number永远是0。在此之后记录了创建的文件flag以及文件名，用作重启恢复时的检查。
-3. 提供额外信息的 Logic Redo
-  比如`MLOG_SINGLE_REC_FLAG`，`MLOG_MULTI_REC_END`，`MLOG_INDEX_LOAD`。
-
-在这些基础的格式之上，MySQL通过不同的层次，把redo记录组织起来。
-
----
-
-**Redo的组织形式：**
-
-1. 逻辑Redo层
-  真正的Redo内容，由多个不同Type的多个Redo记录首尾相连组成，有全局唯一的递增的偏移sn，InnoDB会在全局log_sys中维护当前sn的最大值，并在每次写入数据时将sn增加Redo内容长度
-  ![redo log存储过程](/img/post/mysql/logic_redo_log.png){:height="80%" width="80%"}
-
-2. 物理Redo层
-  InnoDB中用Block的概念来读写数据，一个Block的长度OS_FILE_LOG_BLOCK_SIZE等于磁盘扇区的大小512B，每次IO读写的最小单位都是一个Block。除了Redo数据以外，Block中还需要一些额外的信息。
-  ![redo log存储过程](/img/post/mysql/block_redo_logic.png){:height="80%" width="80%"}
-3. 文件层
-  Redo最终会被写入到Redo日志文件中，以ib_logfile0、ib_logfile1…命名，为了避免创建文件及初始化空间带来的开销，InooDB的Redo文件会循环使用，通过参数innodb_log_files_in_group可以指定Redo文件的个数。多个文件首尾相连顺序写入Redo内容。
-
-整体的结构可以描述为：逻辑REDO是真正需要的数据，用sn索引，逻辑REDO按固定大小的Block组织，并添加Block的头尾信息形成物理REDO，以lsn索引，这些Block又会放到循环使用的ib_logfile中的某一位置，文件中用offset索引。
-![redo log存储过程](/img/post/mysql/redo_log.png){:height="80%" width="80%"}
-
 ## 写入逻辑
 
 redo log 包括两部分：一是内存中的日志缓冲(redo log buffer)，该部分日志是易失性的。二是磁盘上的重做日志文件(redo log file)，该部分日志是持久的，并且是事务的记录是顺序追加的，性能非常高(磁盘的顺序写性能比内存的写性能差不了太多)。
@@ -100,6 +68,8 @@ InnoDB 有一个后台线程，每隔 1 秒，就会把 redo log buffer 中的�
 
 每秒一次后台轮询刷盘，再加上崩溃恢复这个逻辑，InnoDB就认为redo log在commit的时候就不需要fsync了，只会write到文件系统的page cache中就够了。
 
+MySQL的“双1”配置，指的就是sync_binlog和innodb_flush_log_at_trx_commit都设置成 1。也就是说，一个事务完整提交前，需要等待两次刷盘，一次是redo log（prepare 阶段），一次是binlog。
+
 ## 检查点（checkpoint）
 
 数据经过更新或者删除之后，数据页变为脏页，需要刷回磁盘，在事务提交时，先写 redo log，再修改页，再在合适的时机刷回磁盘。这样即使宕机，也可以通过 redo log 来恢复数据。InnoDB 的 redo log 是固定大小的，比如可以配置为一组 4 个文件，每个文件的大小是 1GB，那么总共就可以记录 4GB 的操作。从头开始写，写到末尾就又回到开头循环写。检查点表示脏页写入到磁盘的时候，所以检查点也就意味着脏数据的写入，其目的是：
@@ -113,6 +83,38 @@ InnoDB 有一个后台线程，每隔 1 秒，就会把 redo log buffer 中的�
 
 - sharp checkpoint：完全检查点，数据库正常关闭时，会触发把所有的脏页都写入到磁盘上。
 - fuzzy checkpoint：模糊检查点，部分页写入磁盘。发生在数据库正常运行期间。主线程在空闲时会周期性执行，或者在空闲页不足，或者redo log文件快满时会执行模糊检查点。
+
+## Redo日志的格式和类型
+
+1. **作用于 Page 的 Redo**
+  大部分的用户操作都是此类，比如 `MLOG_REC_INSERT`、`MLOG_REC_UPDATE_IN_PLACE`、`MLOG_REC_DELETE`三种类型分别对应于Page中记录的插入、修改以及删除。
+  ![redo log存储过程](/img/post/mysql/rodo_log.png){:height="80%" width="80%"}
+  上图以`MLOG_REC_UPDATE_IN_PLACE`为例，Type就是`MLOG_REC_UPDATE_IN_PLACE`类型，Space ID和Page Number唯一标识一个Page页，这三项是所有REDO记录都需要有的头信息。后面的是`MLOG_REC_UPDATE_IN_PLACE`类型独有的，其中Record Offset用给出要修改的记录在Page中的位置偏移，Update Field Count说明记录里有几个Field要修改，紧接着对每个Field给出了Field编号(Field Number)，数据长度（Field Data Length）以及数据（Filed Data）
+2. **作用于 Space 的 Redo**
+  这类REDO针对一个Space文件的修改，如`MLOG_FILE_CREATE`，`MLOG_FILE_DELETE`，`MLOG_FILE_RENAME`分别对应对一个`Space`的创建，删除以及重命名。
+  ![redo log存储过程](/img/post/mysql/redo_log_mlog.png){:height="80%" width="80%"}
+  上图以MLOG_FILE_CREATE为例，前三个字段还是Type，Space ID和Page Number，由于是针对Space的操作，这里的Page Number永远是0。在此之后记录了创建的文件flag以及文件名，用作重启恢复时的检查。
+3. 提供额外信息的 Logic Redo
+  比如`MLOG_SINGLE_REC_FLAG`，`MLOG_MULTI_REC_END`，`MLOG_INDEX_LOAD`。
+
+在这些基础的格式之上，MySQL通过不同的层次，把redo记录组织起来。
+
+---
+
+**Redo的组织形式：**
+
+1. 逻辑Redo层
+  真正的Redo内容，由多个不同Type的多个Redo记录首尾相连组成，有全局唯一的递增的偏移sn，InnoDB会在全局log_sys中维护当前sn的最大值，并在每次写入数据时将sn增加Redo内容长度
+  ![redo log存储过程](/img/post/mysql/logic_redo_log.png){:height="80%" width="80%"}
+
+2. 物理Redo层
+  InnoDB中用Block的概念来读写数据，一个Block的长度OS_FILE_LOG_BLOCK_SIZE等于磁盘扇区的大小512B，每次IO读写的最小单位都是一个Block。除了Redo数据以外，Block中还需要一些额外的信息。
+  ![redo log存储过程](/img/post/mysql/block_redo_logic.png){:height="80%" width="80%"}
+3. 文件层
+  Redo最终会被写入到Redo日志文件中，以ib_logfile0、ib_logfile1…命名，为了避免创建文件及初始化空间带来的开销，InooDB的Redo文件会循环使用，通过参数innodb_log_files_in_group可以指定Redo文件的个数。多个文件首尾相连顺序写入Redo内容。
+
+整体的结构可以描述为：逻辑REDO是真正需要的数据，用sn索引，逻辑REDO按固定大小的Block组织，并添加Block的头尾信息形成物理REDO，以lsn索引，这些Block又会放到循环使用的ib_logfile中的某一位置，文件中用offset索引。
+![redo log存储过程](/img/post/mysql/redo_log.png){:height="80%" width="80%"}
 
 ## 参考文献
 
