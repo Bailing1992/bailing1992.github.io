@@ -13,14 +13,14 @@ tags:
 
 ![BSON](/img/post/store/mongo/整体架构.PNG)
 
-
-> **In-Memory**     
+> **In-Memory**
 > In-Memory 存储引擎将数据存储在内存中，除了少量的元数据和诊断（Diagnostic）日志，In-Memory存储引擎不会维护任何存储在硬盘上的数据（On-Disk Data），避免Disk的IO操作，减少数据查询的延迟。
-
-> **MMAPv1**:      
+>
+> **MMAPv1**:
 > 从MongoDB 4.2开始，MongoDB移除了MMAPv1存储引擎。并发级别上，MMAPv1支持到collection级别，所以对于同一个collection同时只能有一个write操作执行，这一点相对于wiredTiger而言，在write并发性上就稍弱一些。
 
 ## WiredTiger 特性&架构概览
+
 ![BSON](/img/post/store/mongo/WiredTiger特性.PNG)
 
 - Row Storage & Column Storage：基于BTree的行存/列存；
@@ -29,8 +29,8 @@ tags:
 - Transaction & Snapshots：事务；
 - Schema & Cursors：Connection,Session, Cursor等；
 
-
 ## 数据模型
+
 ![BSON](/img/post/store/mongo/数据模型.PNG)
 
 - MongoDB 的 1 个 ```collection/index```，对应 WiredTiger 的一个 ```b+tree```；
@@ -39,7 +39,8 @@ tags:
 - WiredTiger 在磁盘上的数据组织方式和内存中是不同的，在磁盘上的数据一般是经过压缩以节省空间和读取时的 IO 开销。当从磁盘向内存中读取数据时，一般会经过解压缩、将数据重新构建为内存中的数据组织方式等步骤。
 - 持久化时，修改操作不会在原来的 leaf page 上进行，而是写入新分配的 page，每次 checkpoint 都会产生一个新的 root page。 这样的好处是对不修改原有 page，就能更好的并发。
 
-#### Cache
+### Cache
+
 ![BSON](/img/post/store/mongo/cache_b+tree.png)
 
 - Cache中的BTree包含全部或部分磁盘的数据page
@@ -48,24 +49,7 @@ tags:
   - 如果Cache占用内存过高时，clean page会被直接淘汰出cache；
   - 如果clean page被修改写入，变成dirty page，dirty page会被evict/checkpoint刷到data file
 
-
-
-
-
-
-
-
-
-
-
 上图是 page 在内存中的数据结构，是一个典型的 ```b+tree```，每个叶节点的 page 上有 3 个重要的 list：```WT_ROW```、```WT_UPDATE```、```WT_INSERT```:
-
-
-
- 
-
-
-
 
 - 内存中的 ```b+tree``` 树：是一个checkpoint。初次加载时并不会将整个 ```b+tree``` 树加载到内存，一般只会加载根节点和第一层的数据页，后续如果需要读取数据页再从磁盘加载
 - 叶节点Page的 WT_ROW：是从磁盘加载进来的数据数组
