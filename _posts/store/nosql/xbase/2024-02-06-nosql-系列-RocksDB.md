@@ -8,3 +8,7 @@ catalog: true
 tags:
   - nosql 
 ---
+
+RocksDB 是 facebook 基于 LevelDB 开发的单机存储引擎，主要开发语言为 C++。
+
+## LSM 
