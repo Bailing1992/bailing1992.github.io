@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Mongo WiredTiger存储引擎"
+title: "Mongo WiredTiger引擎"
 subtitle: 'WiredTiger存储引擎介绍...'
 author: "lichao"
 header-img: "img/post/bg/post-bg-rwd.jpg"
