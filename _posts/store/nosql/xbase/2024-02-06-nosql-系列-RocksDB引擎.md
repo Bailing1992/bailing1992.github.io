@@ -9,13 +9,15 @@ tags:
   - nosql 
 ---
 
-RocksDB 是 facebook 基于 LevelDB 开发的单机存储引擎，主要开发语言为 C++。
+RocksDB是Facebook在Google开源key-value存储LevelDB的基础上开发而来的单机存储引擎。LevelDB是一个精简基于LSM tree的数据库，而RocksDB在LevelDB的基础上进行了大量的优化和功能的添加，比如将LevelDB的单线程compaction改成多线程compaction，提高写入效率；实现了事务的功能，引入了列簇(column family)的概念。
+
+**主要解决写多读少的写密集型场景的性能问题，牺牲部分读性能来加速写性能；**
 
 ## LSM
 
-LSM Tree，即 Log-Structured Merge-Tree，它不是一个数据结构，而是一种数据存储引擎的设计思想和算法，主要为了提升写多读少场景下的性能。
+LSM Tree（Log-Structured Merge-Tree）不是一个数据结构，而是一种数据存储引擎的设计思想和算法，主要为了提升写多读少场景下的性能。
 
-LSM Tree提升写性能的关键点在于将所有的写操作都变成顺序写，避免随机 IO。核心思想就是异步对数据做合并、压缩，维护数据的有序性。
+LSM Tree提升写性能的关键点在于将所有的写操作都变成顺序写，避免随机IO。核心思想就是异步对数据做合并、压缩，维护数据的有序性。
 
 ## 整体架构
 
@@ -25,13 +27,21 @@ LSM Tree提升写性能的关键点在于将所有的写操作都变成顺序写
 
 为什么不能只有两层？为了提高 Compaction 效率。假设 LevelDB 只有 2 层（ 0 层和 1 层），那么时间一长，1 层肯定会累计大量的文件。当 0 层的文件需要下沉时，也就是 Major Compaction 要来了，假设只下沉一个 0 层文件，它不是简简单单地将文件元信息的层数从 0 改成 1 就可以了。它需要继续保持 1 层文件的有序性，每个文件中的 Key 取值范围要保持没有重叠。它不能直接将 0 层文件中的键值对分散插入或者追加到 1 层的所有文件中，因为 sst 文件是紧凑存储的，插入操作肯定涉及到磁盘块的移动。再说还有删除操作，它需要干掉 1 层文件中的某些已删除的键值对，避免它们持续占用空间。
 
-为什么每层都分为多个小的文件？如果是单个文件，那么数据的合并压缩效率会很低，而且会影响读写的性能。多层的文件结构提供了写压力的“缓冲”能力。
+**为什么每层都分为多个小的文件？**如果是单个文件，那么数据的合并压缩效率会很低，而且会影响读写的性能。多层的文件结构提供了写压力的“缓冲”能力。
 
-如何进一步提升效率？每个小文件中的数据保持有序，利用多路归并的思想合并，提高合并效率。同时每个文件构建索引、Bloom Filter，提高查询效率。
+**如何进一步提升效率？**每个小文件中的数据保持有序，利用多路归并的思想合并，提高合并效率。同时每个文件构建索引、Bloom Filter，提高查询效率。
+
+**产生的问题：**
+
+- *读放大：*数据可能存在Memtable，immutable memtable，以及多层SST File中，所以一次读可能放大为多次数据查找（多层SST File的数据是存在重叠冗余的）；
+- *写放大：*写放大主要是由Compaction引入的；
+- *空间放大：*数据在多层之间是冗余的，同时WAL日志也会占用一定的空间；
 
 ### Memtable
 
-数据在内存中的结构，分为memtable和immutable memtable，其中memtable为读写结构，当memtable增长到一定大小的时候就会变成immutable memtable，只读不写；memtable 和 immutable memtable 的数据结构是一样的，其中LevelDB只支持一个immutable memtable，RocksDB在此基础上做了优化，支持多个immutable memtable，提高写入性能。
+数据在内存中的结构，分为memtable和immutable memtable，其中memtable为读写结构，当memtable增长到一定大小的时候就会变成immutable memtable，只读不写；
+
+memtable 和 immutable memtable 的数据结构是一样的，其中LevelDB只支持一个immutable memtable，RocksDB在此基础上做了优化，支持多个immutable memtable，提高写入性能。
 
 ![memtable](/img/post/store/memtable.png)
 
@@ -53,13 +63,30 @@ RocksDB 写入一个 Record 时，都会先向日志里写入一条记录，这�
 
 ### SST File
 
-Sorted String Table File，数据按照key有序存储后，在磁盘上最终存储为SST File，通过Compaction来维护每层数据，其中最下面一层存储全量数据。
+Sorted String Table File 数据按照key有序存储后，在磁盘上最终存储为SST File，通过Compaction来维护每层数据，其中最下面一层存储全量数据。
+在磁盘上的文件分为多个level，其中level 0是特殊的，它包含了刚刚被flush的Memtable，因此存在level 0中的数据会比其他level更新。此外，Level 0的各文件之间并不是有序的，而其他Level中的各个SST File间是有序的。
 
-**产生的问题：**
+![memtable](/img/post/store/rocketdb_minor_com.png)
 
-- *读放大：*数据可能存在Memtable，immutable memtable，以及多层SST File中，所以一次读可能放大为多次数据查找（多层SST File的数据是存在重叠冗余的）；
-- *写放大：*写放大主要是由Compaction引入的；
-- *空间放大：*数据在多层之间是冗余的，同时WAL日志也会占用一定的空间；
+- 内置布隆过滤器
+- 每个文件记录最小key和最大key
+- DataBlock: 主要用来存放key和value
+![memtable](/img/post/store/rocketdb_block_data.png)
+- MetaBlock: 存放关于key-value的元信息，包含index block、 filter block、range_del block，compression block，properties block等几种。
+  - filter block：用来保存一些bloom filter用来加速查找，可以挡住一部分无效查询
+  - Compression Dict meta Block：这个block是字典压缩block，这个部分的是为了节约datablock/filterblock/indexblock的存储空间而 设置的一个针对key的字典压缩后的数据存放区域。大多数情况下，只有当key-value数据写入到了最后一层的时候才会开始进行压缩
+  - range_del block:用于标识被批量删除前缀key的数据
+  - properties block：保存了一些当前SST文件的属性信息，同时也包括其他的各个block属性数据，例如有多少个datablock，index block，SST文件大小等各个维度的数据
+- MetaIndex Block：key是filter的名称，主要用来存放meta block的索引，这个索引是由block的偏移量和大小组成。
+- Index Block：key是对应块的最大key，value用来存放data block的索引，这个索引是由block的偏移量和大小组成。
+- footer：主要是用来索引 meta index block 和 index block
+
+### Cache
+
+table cache缓存的是sstable的索引数据，类似于文件系统中对inode的缓存。每个sst文件打开是一个TableReader对象，它会缓存在table_cache中。key值是SSTable的文件名称，Value部分包含两部分，一个是指向磁盘打开的SSTable文件的文件指针，这是为了方便读取内容；另外一个保存了SSTable的index内容以及用来指示block cache用的cache_id 。
+　　
+Block Cache 是 RocksDB 的数据的缓存，这个缓存可以在多个 RocksDB 的实例下缓存。一般默认的Block Cache 中存储的值是未压缩的，而用户可以再指定一个 Block Cache，里面的数据可以是压缩的。用户访问数据先访问默认的 Block Cache，待无法获取后再访问用户 Cache，用户 Cache 的数据可以直接存入 page cache 中。
+Cache 有两种：LRUCache 和 ClockCache。
 
 ## 核心流程
 
@@ -81,10 +108,12 @@ Sorted String Table File，数据按照key有序存储后，在磁盘上最终�
 
 ![memtable](/img/post/store/rocketdb_output.png)
 
-1. 查询 Memtable 和 Immutable ，利用布隆过滤器加速
-2. 遍历 L0 层所有 SST 文件查询
-3. 对于非 L0 层，先确定本层需要查询的文件范围
-4. 对于每个非 L0 层的文件，采用二分查询查找
+1. 查询Memtable和Immutable，利用布隆过滤器加速
+2. 遍历L0层所有SST文件查询
+3. 对于非L0层，先确定本层需要查询的文件范围
+4. 对于每个非L0层的文件，采用二分查询查找
+
+> 数据库中的读可分为当前读和快照读，所谓当前读，就是读取记录的最新版本数据，而快照读就是读指定版本的数据。
 
 #### 版本链
 
@@ -106,18 +135,13 @@ Compaction 时机包括：
 - L0 层文件数达到阈值
 - 非 L0 层文件总大小超过阈值
 
-#### Tombstone（墓碑）
-
-RocksDB 的删除操作其实只是写入了一个 tombstone 标记，而这个标记往往只有被 compact 到最底层才能被丢掉。为什么不直接删除呢？因为数据在多层之间存在重叠，删除的话非常消耗资源。
-
-数据的频繁 update 会在 SST 文件中产生较多的“墓碑”数据。
-
 ![memtable](/img/post/store/rocketdb_store.png)
 
 **L0层:**
 
-Minor Compaction 做的事就是将 Immutable 完整地序列化成一个 L0 层的文件，速度快，耗费资源少。
-因为是按照时间对 Immutable 的序列化，所以 L0 层的文件之间 key 是非有序的，查询的时候需要遍历全部文件。L0 层文件不能太多，否则会影响查询效率。
+Minor Compaction做的事就是将Immutable完整地序列化成一个L0层的文件，速度快，耗费资源少。
+
+因为是按照时间对Immutable的序列化，所以L0层的文件之间key是非有序的，查询的时候需要遍历全部文件。L0层文件不能太多，否则会影响查询效率。
 
 **非L0层：**
 
@@ -136,6 +160,12 @@ Major Compaction 涉及到多个文件之间的合并操作，耗费资源多，
 L0到 L1 层的 compaction 默认不并行处理，可以通过 sub-compact 加快速度。
 
 ![memtable](/img/post/store/rocketdb_sub.png)
+
+#### Tombstone（墓碑）
+
+RocksDB 的删除操作其实只是写入了一个 tombstone 标记，而这个标记往往只有被 compact 到最底层才能被丢掉。为什么不直接删除呢？因为数据在多层之间存在重叠，删除的话非常消耗资源。
+
+数据的频繁 update 会在 SST 文件中产生较多的“墓碑”数据。
 
 ### 压缩
 
