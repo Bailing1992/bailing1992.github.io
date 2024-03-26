@@ -9,7 +9,7 @@ tags:
   - nosql 
 ---
 
-HBase是非常热门的一款分布式KV数据库系统，国内各大公司都使用HBase存储海量数据。本质上HBase是一个稀疏的、分布式的、持久性的、多维的、排序的Map结构数据库。
+HBase是非常热门的一款分布式KV数据库系统，国内各大公司都使用HBase存储海量数据。本质上HBase是一个稀疏的、高可靠性、面向列、可伸缩的分布式存储系统。
 
 ### 历史背景
 
@@ -37,6 +37,7 @@ HBase是非常热门的一款分布式KV数据库系统，国内各大公司都�
 - 高性能:数据写操作性能强劲，对于随机单点读以及小范围的扫描读，性能也能够保证。
 - 多版本:HBase支持多版本，一个KV可以同时保留多个版本。
 - 支持过期:支持TTL过期特性，
+- 数据存储在hdfs上，备份机制健全；
 
 **缺点：**
 
@@ -48,9 +49,9 @@ HBase是非常热门的一款分布式KV数据库系统，国内各大公司都�
 
 ![framework](/img/post/hbase/framework.png){:height="80%" width="80%"}
 
-- Zookeeper:实现Master高可用、管理系统核心元数据、参与RegionServer宕机恢复、分布式锁。
-- Master:处理管理请求:表操作、权限操作、合并数据分片、Compaction。管理RegionServer的负载均衡、宕机恢复、迁移。清理过期日志及文件。
-- RegionServer:响应用户的IO请求，是HBase最核心的模块。
+- Zookeeper: 实现Master高可用、管理系统核心元数据、参与RegionServer宕机恢复、分布式锁。
+- Master: 处理管理请求: 表操作、权限操作、合并数据分片、Compaction。管理RegionServer的负载均衡、宕机恢复、迁移。清理过期日志及文件。
+- RegionServer: 响应用户的IO请求，是HBase最核心的模块。
 - HDFS: HBase中的所有数据文件都存储在Hadoop HDFS文件系统上，包括数据文件HFile、日志文件HLog File存储。
 
 #### RegionServer
