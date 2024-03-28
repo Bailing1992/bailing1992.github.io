@@ -66,9 +66,9 @@ static int indexFor(int h, int length) {  //jdk1.7的源码，jdk1.8没有这个
           Map.Entry<Integer, String> entry = it.next();
           Integer key = entry.getKey();
           if(key % 2 == 0){
-         	 System.out.println("To delete key " + key);
-         	 it.remove();    
-         	 System.out.println("The key " + + key + " was deleted");
+               System.out.println("To delete key " + key);
+               it.remove();    
+               System.out.println("The key " + + key + " was deleted");
 
           }
       }
