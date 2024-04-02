@@ -6,7 +6,7 @@ author: "lichao"
 header-img: "img/post/bg/post-bg-rwd.jpg"
 catalog: true
 tags:
-  - nosql 
+  - hbase 
 ---
 
 HBase是非常热门的一款分布式KV数据库系统，国内各大公司都使用HBase存储海量数据。本质上HBase是一个稀疏的、高可靠性、面向列、可伸缩的分布式存储系统。
