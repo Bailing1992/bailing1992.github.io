@@ -11,19 +11,19 @@ tags:
 
 ## 基础架构
 
-![framework](/img/post/store/graph/byte_graph_frame.png){:height="80%" width="80%"}
+ByteGraph整体架构自上而下分为两层:
 
-ByteGraph的整体架构自上而下分为两层（类似mysql的sql层和innodb存储引擎）
+![framework](/img/post/store/graph/byte_graph_frame.png){:height="80%" width="80%"}
 
 ### GQ查询层
 
 ![framework](/img/post/store/graph/byte_graph_gq.png){:height="80%" width="80%"}
 
-GQ和Mysql的sql层一样，主要工作是做查询的解析和处理：
+GQ 主要工作是做查询的解析和处理：
 
-1. Parser阶段：把查询语言解析成一个查询语法树，为了提升parser效率，BG内部设置了查询计划缓存
-2. 生成查询计划：把步骤1的查询语法树按照一定的查询优化策略（RBO & CBO）转成查询计划
-3. 执行查询计划：与GS层交互，需要理解存储层分partition的逻辑，找到数据，下推算子，merge查询结果，完成查询
+1. parser阶段：把查询语言解析成一个查询语法树，为了提升parser效率，BG内部设置了查询计划缓存。
+2. 生成查询计划：把步骤1的查询语法树按照一定的查询优化策略（RBO & CBO）转成查询计划。
+3. 执行查询计划：与GS层交互，需要理解存储层分partition的逻辑，找到数据，下推算子，merge查询结果，完成查询。
 
 ### GS存储引擎层
 
