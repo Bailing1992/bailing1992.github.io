@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "MQ 系列 核心特性"
+title: "MQ 系列 namesrv VS zookeeper"
 subtitle: '消息中间件基本特性'
 author: "lichao"
 header-img: "img/post/bg/post-bg-rwd.jpg"
