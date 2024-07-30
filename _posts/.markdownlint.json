@@ -5,7 +5,7 @@
     },
     "MD013":{
         "code_block_line_length": 500,  
-        "line_length": 1000 
-      }
-
+        "line_length": 1000
+    },
+    "no-hard-tabs": false
 }
