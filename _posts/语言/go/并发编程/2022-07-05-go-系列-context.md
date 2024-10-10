@@ -9,6 +9,9 @@ tags:
   - go
 ---
 
+在Go服务器中，每个传入的请求都在自己的goroutine中处理。请求的处理程序经常启动额外的goroutine来访问后端服务，如数据库和RPC服务。处理一个请求的一组goroutine通常需要访问该请求相关的特定的值，比如最终用户的身份、授权令牌和请求的deadline等。当一个请求被取消或处理超时时，所有在该请求上工作的goroutines应该迅速退出，以便系统可以回收他们正在使用的任何资源。
+
+在 Google，开发了一个context包，可以轻松地将请求范围内的传值、取消信号和截止日期传递给所有参与处理该请求的 goroutine。
 
 > Context 设计目的是跟踪 goroutine 调用树，并在这些 goroutine 调用树中传递通知与元数据。
 > Context 提供的核心功能是多个 goroutine 之间的退出通知机制，传递数据只是一个辅助功能，应谨慎使用 context 传递数据。
@@ -20,11 +23,9 @@ context 整体是一个树形结构，不同的 ctx 间可能是兄弟节点或�
 
 同时由于 Context 接口有多种不同的实现，所以树的节点可能也是多种不同的 ctx 实现。总的来说我觉得 Context 的特点是：
 
-- 树形结构，每次调用WithCancel, WithValue, WithTimeout, WithDeadline实际是为当前节点在追加子节点。
-
-继承性，某个节点被取消，其对应的子树也会全部被取消。
-
-多样性，节点存在不同的实现，故每个节点会附带不同的功能。
+- 树形结构：每次调用WithCancel, WithValue, WithTimeout, WithDeadline实际是为当前节点追加子节点。
+- 继承性：某个节点被取消，其对应的子树也会全部被取消。
+- 多样性：节点存在不同的实现，故每个节点会附带不同的功能。
 
 ## 基础用法
 
@@ -140,11 +141,13 @@ func NewOutgoingContext(ctx context.Context, md MD) context.Context {
 context.Context是一个接口，源码里是有多种不同的实现的，借此实现不同的功能。
 
 ```go
+// context携带截止日期、取消信号和请求维度的传值
+// 其方法对于多个goroutine同时使用是安全的
 type Context interface {
-    Deadline() (deadline time.Time, ok bool)  // 完成工作的截止日期
-    Done() <-chan struct{}                    // 当前工作完成或者上下文被取消后关闭
-    Err() error                               // 返回 context 取消原因
-    Value(key interface{}) interface{}        // 获取之前设置的 key 对应的 value
+    Deadline() (deadline time.Time, ok bool)  // Done返回一个信道（chan），当此Context被取消或超时时，该信道将关闭
+    Done() <-chan struct{}                    // 在Done信道关闭后，Err可返回context被取消的原因
+    Err() error                               // Deadline返回此Context什么时间会被取消（如果有的话）
+    Value(key interface{}) interface{}        // Value返回key对应的值，如果没有则返回nil
 }
 ```
 
