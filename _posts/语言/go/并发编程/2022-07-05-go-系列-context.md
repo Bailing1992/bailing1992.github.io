@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Go 系列 context"
-subtitle: "..."
+subtitle: "介绍 context 标准库"
 author: "lichao"
 header-img: "img/post/bg/post-bg-ngon-ngu-golang.jpg"
 catalog: true
