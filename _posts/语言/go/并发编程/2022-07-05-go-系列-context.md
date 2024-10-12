@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Go 系列 Context 标准库"
-subtitle: "Context 顾名思义是协程的上下文，主要用于跟踪协程的状态，可以做一些简单的协程控制，也能记录一些协程信息"
+title: "Go 系列 context"
+subtitle: "..."
 author: "lichao"
 header-img: "img/post/bg/post-bg-ngon-ngu-golang.jpg"
 catalog: true
